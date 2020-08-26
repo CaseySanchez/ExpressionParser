@@ -18,9 +18,10 @@ class ExpressionParser
     std::string expression;
 
     std::map<std::string, std::shared_ptr<Term>> terms;
-    
+
     size_t expression_id;
     size_t function_id;
+    size_t constant_id;
 
 public:
     ExpressionParser(std::string const &expression, std::map<std::string, std::shared_ptr<Term>> const &terms);

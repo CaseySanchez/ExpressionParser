@@ -1,6 +1,6 @@
 #include "expression_parser.hpp"
 
-ExpressionParser::ExpressionParser(std::string const &expression, std::map<std::string, std::shared_ptr<Term>> const &terms) : expression(expression), terms(terms), expression_id(0), function_id(0)
+ExpressionParser::ExpressionParser(std::string const &expression, std::map<std::string, std::shared_ptr<Term>> const &terms) : expression(expression), terms(terms), expression_id(0), function_id(0), constant_id(0)
 {
     if (expression.empty()) {
         throw std::invalid_argument("Expression is empty");
@@ -154,9 +154,9 @@ std::shared_ptr<Term> ExpressionParser::Terms(std::string const &term)
     try {
         double value = std::stod(term);
 
+        std::string constant_name = "C_" + std::to_string(constant_id++);
+        
         std::shared_ptr<Constant> constant_term(new Constant(value));
-
-        std::string constant_name(term);
 
         terms.try_emplace(constant_name, constant_term);
 
