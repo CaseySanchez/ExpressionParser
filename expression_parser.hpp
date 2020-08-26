@@ -17,13 +17,13 @@ class ExpressionParser
 {
     std::string expression;
 
+    std::map<std::string, std::shared_ptr<Term>> terms;
+    
     size_t expression_id;
     size_t function_id;
-    
-    std::map<std::string, std::shared_ptr<Term>> terms;
 
 public:
-    ExpressionParser(std::string const &expression, std::map<std::string, std::shared_ptr<Term>> const &variables);
+    ExpressionParser(std::string const &expression, std::map<std::string, std::shared_ptr<Term>> const &terms);
 
     std::shared_ptr<Term> Parse();
 

@@ -1,14 +1,12 @@
 #include "expression_parser.hpp"
 
-ExpressionParser::ExpressionParser(std::string const &expression, std::map<std::string, std::shared_ptr<Term>> const &variables) : expression(expression), expression_id(0), function_id(0)
+ExpressionParser::ExpressionParser(std::string const &expression, std::map<std::string, std::shared_ptr<Term>> const &terms) : expression(expression), terms(terms), expression_id(0), function_id(0)
 {
     if (expression.empty()) {
         throw std::invalid_argument("Expression is empty");
     }
 
     std::cout << expression << std::endl;
-
-    terms.insert(std::cbegin(variables), std::cend(variables));
 }
 
 std::shared_ptr<Term> ExpressionParser::Parse()
