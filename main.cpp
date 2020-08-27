@@ -1,5 +1,6 @@
 // Evaluates 3D wavefunction at various spherical coordinates where 
-// int_{-infty}^{infty} int_{-infty}^{infty} int_{-infty}^{infty} pi^{-3/2} * e^{-(x^2+y^2+z^2)} dz dy dx = 1
+// psi(x, y, z) = pi^{-3/2} * e^{-(x^2+y^2+z^2)}
+// such that int_{-infty}^{infty} int_{-infty}^{infty} int_{-infty}^{infty} psi(x, y, z) dz dy dx = 1
 
 #include "expression_parser.hpp"
 
@@ -13,7 +14,7 @@ int main(int argc, char *argv[])
 
         ExpressionParser expression_parser("pi ^ ( -3 / 2 ) * exp( - ( x ^ 2 + y ^ 2 + z ^ 2 ) )", { { "pi", pi }, { "x", x }, { "y", y }, { "z", z } });
         
-        std::shared_ptr<Term> expression_root = expression_parser.Parse();
+        std::shared_ptr<Term> psi = expression_parser.Parse();
 
         for (double radius = 0.0; radius < 2.0; radius += 0.5) {
             for (double theta = 0.0; theta < 2.0 * 3.14159; theta += 0.25 * 3.14159) {
@@ -22,7 +23,7 @@ int main(int argc, char *argv[])
                     *y = radius * std::sin(theta) * std::sin(phi);
                     *z = radius * std::cos(theta);
 
-                    std::cout << "psi(" << radius << ", " << theta << ", " << phi << ") = " << expression_root->Value() << std::endl;
+                    std::cout << "psi(" << radius << ", " << theta << ", " << phi << ") = " << psi->Value() << std::endl;
                 }
             }
         }
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
     catch(std::exception const &exception) {
         std::cout << exception.what() << std::endl;
         
-        throw exception;
+        return 1;
     }
 
     return 0;
