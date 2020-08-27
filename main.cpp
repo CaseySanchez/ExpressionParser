@@ -1,3 +1,6 @@
+// Evaluates 3D wavefunction at various spherical coordinates where 
+// int_{-infty}^{infty} int_{-infty}^{infty} int_{-infty}^{infty} pi^{-3/2} * e^{-(x^2+y^2+z^2)} dz dy dx = 1
+
 #include "expression_parser.hpp"
 
 int main(int argc, char *argv[])
