@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
         std::shared_ptr<Variable> y(new Variable(0.0));
         std::shared_ptr<Variable> z(new Variable(0.0));
 
-        ExpressionParser expression_parser("pi^( -3 / 2 ) * exp( - ( x^2 + y^2 + z^2 ) )", { { "pi", pi }, { "x", x }, { "y", y }, { "z", z } });
+        ExpressionParser expression_parser("pi ^ ( -3 / 2 ) * exp( - ( x ^ 2 + y ^ 2 + z ^ 2 ) )", { { "pi", pi }, { "x", x }, { "y", y }, { "z", z } });
         
         std::shared_ptr<Term> expression_root = expression_parser.Parse();
 

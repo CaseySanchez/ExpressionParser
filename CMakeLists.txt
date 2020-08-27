@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(EquationParser)
+project(ExpressionParser)
 
-add_executable(EquationParser main.cpp term.cpp operation.cpp function.cpp expression_parser.cpp)
+add_executable(ExpressionParser main.cpp term.cpp operation.cpp function.cpp expression_parser.cpp)
 
-set_property(TARGET EquationParser PROPERTY CXX_STANDARD 20)
+set_property(TARGET ExpressionParser PROPERTY CXX_STANDARD 20)
 
-target_link_libraries(EquationParser pcrecpp)
+target_link_libraries(ExpressionParser pcrecpp)
