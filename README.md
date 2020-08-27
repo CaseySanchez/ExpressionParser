@@ -3,7 +3,7 @@
 
 
 ### Description
-Expression Parser is an algebraic expression parser. The parser takes an input string expression and an input map of terms to parse & construct an expression tree for evaluation.
+Expression Parser is an algebraic expression parser. The parser takes an input string expression and an input map of terms to parse & construct an expression tree for evaluation. The expression is parsed with recursive `std::regex` evaluations to construct the expression tree.
 
 
 
