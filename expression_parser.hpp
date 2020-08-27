@@ -24,12 +24,13 @@ class ExpressionParser
     size_t constant_id;
 
 public:
-    ExpressionParser(std::string const &expression, std::map<std::string, std::shared_ptr<Term>> const &terms);
+    ExpressionParser(std::string const &expression, std::map<std::string, std::shared_ptr<Term>> const &terms = { });
 
     std::shared_ptr<Term> Parse();
 
 private:
     void Clean();
+    void Verify();
     
     std::shared_ptr<Term> Brackets(std::string const &expression);
     std::shared_ptr<Term> Operations(std::string const &expression);

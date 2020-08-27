@@ -2,23 +2,36 @@
 
 ExpressionParser::ExpressionParser(std::string const &expression, std::map<std::string, std::shared_ptr<Term>> const &terms) : expression(expression), terms(terms), expression_id(0), function_id(0), constant_id(0)
 {
-    if (expression.empty()) {
-        throw std::invalid_argument("Expression is empty");
-    }
+    Clean();
 
-    std::cout << expression << std::endl;
+    Verify();
 }
 
 std::shared_ptr<Term> ExpressionParser::Parse()
 {
-    Clean();
-
     return Brackets(expression);
 }
 
 void ExpressionParser::Clean()
 {
     expression.erase(std::remove_if(std::begin(expression), std::end(expression), ::isspace), std::end(expression));
+
+    if (expression.empty()) {
+        throw std::invalid_argument("Expression is empty");
+    }
+}
+
+void ExpressionParser::Verify()
+{
+    std::regex reserved_regex("E_[0-9]|F_[0-9]|C_[0-9]");
+
+    std::smatch reserved_match;
+
+    for (auto [term_name, term_ptr] : terms) {
+        if (std::regex_search(std::cbegin(term_name), std::cend(term_name), reserved_match, reserved_regex)) {
+            throw std::invalid_argument("Term name " + term_name + " is reserved");
+        }
+    }
 }
 
 std::shared_ptr<Term> ExpressionParser::Brackets(std::string const &expression)
@@ -35,41 +48,41 @@ std::shared_ptr<Term> ExpressionParser::Brackets(std::string const &expression)
         if ((bracket_match[2].str() == "(" && bracket_match[4].str() == ")") || 
             (bracket_match[2].str() == "[" && bracket_match[4].str() == "]") || 
             (bracket_match[2].str() == "{" && bracket_match[4].str() == "}")) {
-            std::shared_ptr<Term> expression_term = Operations(bracket_match[3].str());
+            std::shared_ptr<Term> expression_ptr = Operations(bracket_match[3].str());
 
             if (std::regex_search(bracket_match[1].first, bracket_match[1].second, function_match, function_regex)) {
                 if (!function_match[2].str().empty()) {
-                    std::shared_ptr<Term> function_term;
+                    std::shared_ptr<Term> function_ptr;
 
                     if (function_match[2].str() == "cos") {
-                        function_term = std::shared_ptr<Cos>(new Cos(expression_term));
+                        function_ptr = std::shared_ptr<Cos>(new Cos(expression_ptr));
                     }
                     else if (function_match[2].str() == "sin") {
-                        function_term = std::shared_ptr<Sin>(new Sin(expression_term));
+                        function_ptr = std::shared_ptr<Sin>(new Sin(expression_ptr));
                     }
                     else if (function_match[2].str() == "tan") {
-                        function_term = std::shared_ptr<Tan>(new Tan(expression_term));
+                        function_ptr = std::shared_ptr<Tan>(new Tan(expression_ptr));
                     }
                     else if (function_match[2].str() == "acos") {
-                        function_term = std::shared_ptr<Acos>(new Acos(expression_term));
+                        function_ptr = std::shared_ptr<Acos>(new Acos(expression_ptr));
                     }
                     else if (function_match[2].str() == "asin") {
-                        function_term = std::shared_ptr<Asin>(new Asin(expression_term));
+                        function_ptr = std::shared_ptr<Asin>(new Asin(expression_ptr));
                     }
                     else if (function_match[2].str() == "atan") {
-                        function_term = std::shared_ptr<Atan>(new Atan(expression_term));
+                        function_ptr = std::shared_ptr<Atan>(new Atan(expression_ptr));
                     }
                     else if (function_match[2].str() == "sqrt") {
-                        function_term = std::shared_ptr<Sqrt>(new Sqrt(expression_term));
+                        function_ptr = std::shared_ptr<Sqrt>(new Sqrt(expression_ptr));
                     }
                     else if (function_match[2].str() == "abs") {
-                        function_term = std::shared_ptr<Abs>(new Abs(expression_term));
+                        function_ptr = std::shared_ptr<Abs>(new Abs(expression_ptr));
                     }
                     else if (function_match[2].str() == "exp") {
-                        function_term = std::shared_ptr<Exp>(new Exp(expression_term));
+                        function_ptr = std::shared_ptr<Exp>(new Exp(expression_ptr));
                     }
                     else if (function_match[2].str() == "log") {
-                        function_term = std::shared_ptr<Log>(new Log(expression_term));
+                        function_ptr = std::shared_ptr<Log>(new Log(expression_ptr));
                     }
                     else {
                         throw std::invalid_argument("Unrecognized function: " + function_match[2].str());
@@ -77,7 +90,7 @@ std::shared_ptr<Term> ExpressionParser::Brackets(std::string const &expression)
                     
                     std::string function_name = "F_" + std::to_string(function_id++);
 
-                    terms.try_emplace(function_name, function_term);
+                    terms.try_emplace(function_name, function_ptr);
 
                     return Brackets(function_match[1].str() + function_name + bracket_match[5].str());
                 }
@@ -85,7 +98,7 @@ std::shared_ptr<Term> ExpressionParser::Brackets(std::string const &expression)
 
             std::string expression_name = "E_" + std::to_string(expression_id++);
 
-            terms.try_emplace(expression_name, expression_term);
+            terms.try_emplace(expression_name, expression_ptr);
 
             return Brackets(bracket_match[1].str() + expression_name + bracket_match[5].str());
         }
@@ -156,11 +169,11 @@ std::shared_ptr<Term> ExpressionParser::Terms(std::string const &term)
 
         std::string constant_name = "C_" + std::to_string(constant_id++);
         
-        std::shared_ptr<Constant> constant_term(new Constant(value));
+        std::shared_ptr<Constant> constant_ptr(new Constant(value));
 
-        terms.try_emplace(constant_name, constant_term);
+        terms.try_emplace(constant_name, constant_ptr);
 
-        return constant_term;
+        return constant_ptr;
     }
     catch (std::invalid_argument const &) {
         try {

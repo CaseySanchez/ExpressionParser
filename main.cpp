@@ -7,12 +7,13 @@
 int main(int argc, char *argv[])
 {
     try {
-        std::shared_ptr<Constant> pi(new Constant(3.141592653589793238463));
+        std::shared_ptr<Constant> pi(new Constant(3.14159265358979323846));
+        std::shared_ptr<Constant> e(new Constant(2.71828182845904523536));
         std::shared_ptr<Variable> x(new Variable(0.0));
         std::shared_ptr<Variable> y(new Variable(0.0));
         std::shared_ptr<Variable> z(new Variable(0.0));
 
-        ExpressionParser expression_parser("pi ^ ( -3 / 2 ) * exp( - ( x ^ 2 + y ^ 2 + z ^ 2 ) )", { { "pi", pi }, { "x", x }, { "y", y }, { "z", z } });
+        ExpressionParser expression_parser("pi ^ { -3 / 2 } * e ^ { - ( x ^ 2 + y ^ 2 + z ^ 2 ) }", { { "pi", pi }, { "e", e }, { "x", x }, { "y", y }, { "z", z } });
         
         std::shared_ptr<Term> psi = expression_parser.Parse();
 
