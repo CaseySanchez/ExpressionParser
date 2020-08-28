@@ -8,7 +8,17 @@ Expression Parser is an algebraic expression parser. The parser takes an input s
 
 
 ### Building
-An example is provided as main.cpp. This example was built on Ubuntu 20.04.1 LTS compiled with GCC 9.3.0.
+Built on Ubuntu 20.04.1 LTS compiled with GCC 9.3.0.
+
+To build & run the unit test:
+```
+cd test
+mkdir build && cd build
+cmake .. && make
+./ExpressionParserTest
+```
+
+To build & run the provided example:
 ```
 mkdir build && cd build
 cmake .. && make
