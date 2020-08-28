@@ -16,7 +16,7 @@ class Variable : public Term
 public:
     Variable(double const &value = 0.0);
 
-    Term &operator=(double const &value);
+    Term &operator=(double const &term);
 };
 
 class Constant : public Term
