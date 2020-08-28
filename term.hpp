@@ -24,5 +24,5 @@ class Constant : public Term
 public:
     Constant(double const &value);
 
-    Term &operator=(Term const &term) = delete;
+    Term &operator=(Term const &value) = delete;
 };
