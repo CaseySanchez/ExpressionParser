@@ -16,7 +16,7 @@ class Variable : public Term
 public:
     Variable(double const &value = 0.0);
 
-    Term &operator=(double const &term);
+    Term &operator=(double const &value);
 };
 
 class Constant : public Term
@@ -24,5 +24,5 @@ class Constant : public Term
 public:
     Constant(double const &value);
 
-    Term &operator=(Term const &value) = delete;
+    Term &operator=(Term const &term) = delete;
 };
