@@ -23,7 +23,7 @@ void ExpressionParser::Clean()
 
 void ExpressionParser::Verify()
 {
-    std::regex reserved_regex("^E_[0-9]+|F_[0-9]+|C_[0-9]+$");
+    std::regex reserved_regex("^E_[0-9]+$|^F_[0-9]+$|^C_[0-9]+$");
 
     std::smatch reserved_match;
 
