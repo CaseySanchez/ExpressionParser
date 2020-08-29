@@ -23,7 +23,7 @@ void ExpressionParser::Clean()
 
 void ExpressionParser::Verify()
 {
-    std::regex reserved_regex("E_[0-9]|F_[0-9]|C_[0-9]");
+    std::regex reserved_regex("^E_[0-9]+|F_[0-9]+|C_[0-9]+$");
 
     std::smatch reserved_match;
 
@@ -36,8 +36,6 @@ void ExpressionParser::Verify()
 
 std::shared_ptr<Term> ExpressionParser::Brackets(std::string const &expression)
 {
-    std::cout << expression << std::endl;
-
     std::regex bracket_regex("^(.*)([\\(\\[\\{])(.*?)([\\)\\]\\}])(.*)$");
     std::regex function_regex("^(.*[\\+\\-\\*\\/\\^\\(\\[\\{])?(.*)$");
     

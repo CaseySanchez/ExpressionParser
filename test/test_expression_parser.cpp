@@ -26,6 +26,6 @@ TEST_CASE("ExpressionParser::Parse") {
     }
 
     SUBCASE("Undefined term") {
-        CHECK_THROWS_AS(ExpressionParser expression_parser("var * 2"); expression_parser.Parse(), std::invalid_argument const &);
+        CHECK_THROWS_AS(ExpressionParser expression_parser("undefined * 2"); expression_parser.Parse(), std::invalid_argument const &);
     }
 }

@@ -2,6 +2,8 @@
 // psi(x, y, z) = pi^{-3/2} * e^{-(x^2+y^2+z^2)}
 // such that int_{-infty}^{infty} int_{-infty}^{infty} int_{-infty}^{infty} psi(x, y, z) dz dy dx = 1
 
+#include <iostream> 
+
 #include "expression_parser.hpp"
 
 int main(int argc, char *argv[])
