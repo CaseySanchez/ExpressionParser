@@ -10,9 +10,9 @@ TEST_CASE("ExpressionParser::ExpressionParser") {
     }
 
     SUBCASE("Reserved term name") {
-        CHECK_THROWS_AS(ExpressionParser expression_parser("E_0", { { "E_0", std::shared_ptr<Term>(new Term()) } }), std::invalid_argument const &);
-        CHECK_THROWS_AS(ExpressionParser expression_parser("F_0", { { "F_0", std::shared_ptr<Term>(new Term()) } }), std::invalid_argument const &);
-        CHECK_THROWS_AS(ExpressionParser expression_parser("C_0", { { "C_0", std::shared_ptr<Term>(new Term()) } }), std::invalid_argument const &);
+        CHECK_THROWS_AS(ExpressionParser expression_parser("E_0", { { "E_0", std::shared_ptr<Node>(new Node()) } }), std::invalid_argument const &);
+        CHECK_THROWS_AS(ExpressionParser expression_parser("F_0", { { "F_0", std::shared_ptr<Node>(new Node()) } }), std::invalid_argument const &);
+        CHECK_THROWS_AS(ExpressionParser expression_parser("C_0", { { "C_0", std::shared_ptr<Node>(new Node()) } }), std::invalid_argument const &);
     }
 }
 
