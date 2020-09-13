@@ -5,6 +5,8 @@
 #include <iostream> 
 
 #include "expression_parser.hpp"
+#include "expression_composer.hpp"
+#include "expression_simplifier.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -15,9 +17,11 @@ int main(int argc, char *argv[])
         std::shared_ptr<Variable> y(new Variable(0.0));
         std::shared_ptr<Variable> z(new Variable(0.0));
 
-        ExpressionParser expression_parser("pi ^ { -3 / 2 } * e ^ { - ( x ^ 2 + y ^ 2 + z ^ 2 ) }", { { "pi", pi }, { "e", e }, { "x", x }, { "y", y }, { "z", z } });
+        std::map<std::string, std::shared_ptr<Node>> node_map = { { "pi", pi }, { "e", e }, { "x", x }, { "y", y }, { "z", z } };
+
+        ExpressionParser expression_parser("pi ^ { -3 / 2 } * e ^ { - ( x ^ 2 + y ^ 2 + z ^ 2 ) }", node_map);
         
-        std::shared_ptr<Term> psi = expression_parser.Parse();
+        std::shared_ptr<Node> psi = expression_parser.Parse();
 
         for (double radius = 0.0; radius < 2.0; radius += 0.5) {
             for (double theta = 0.0; theta < 2.0 * 3.14159; theta += 0.25 * 3.14159) {

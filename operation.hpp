@@ -1,81 +1,104 @@
+/*
+ * Copyright 2020 Casey Sanchez
+ */
+
 #pragma once
 
 #include <memory>
 #include <cmath>
 
-#include "term.hpp"
+#include "node.hpp"
 
-class Affirmation : public Term
+class Affirmation : public Node
 {
-    std::shared_ptr<Term> term;
+    std::shared_ptr<Node> node_ptr;
 
 public:
-    Affirmation(std::shared_ptr<Term> const &term);
+    Affirmation(std::shared_ptr<Node> const &node_ptr);
+
+    std::shared_ptr<Node> NodePtr() const;
 
     double Value() const override;
 };
 
-class Negation : public Term
+class Negation : public Node
 {
-    std::shared_ptr<Term> term;
+    std::shared_ptr<Node> node_ptr;
 
 public:
-    Negation(std::shared_ptr<Term> const &term);
+    Negation(std::shared_ptr<Node> const &node_ptr);
+
+    std::shared_ptr<Node> NodePtr() const;
 
     double Value() const override;
 };
 
-class Exponentiation : public Term
+class Exponentiation : public Node
 {
-    std::shared_ptr<Term> lhs;
-    std::shared_ptr<Term> rhs;
+    std::shared_ptr<Node> lhs_ptr;
+    std::shared_ptr<Node> rhs_ptr;
 
 public:
-    Exponentiation(std::shared_ptr<Term> const &lhs, std::shared_ptr<Term> const &rhs);
+    Exponentiation(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
+
+    std::shared_ptr<Node> LhsPtr() const;
+    std::shared_ptr<Node> RhsPtr() const;
 
     double Value() const override;
 };
 
-class Multiplication : public Term
+class Multiplication : public Node
 {
-    std::shared_ptr<Term> lhs;
-    std::shared_ptr<Term> rhs;
+    std::shared_ptr<Node> lhs_ptr;
+    std::shared_ptr<Node> rhs_ptr;
 
 public:
-    Multiplication(std::shared_ptr<Term> const &lhs, std::shared_ptr<Term> const &rhs);
+    Multiplication(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
+
+    std::shared_ptr<Node> LhsPtr() const;
+    std::shared_ptr<Node> RhsPtr() const;
 
     double Value() const override;
 };
 
-class Division : public Term
+class Division : public Node
 {
-    std::shared_ptr<Term> lhs;
-    std::shared_ptr<Term> rhs;
+    std::shared_ptr<Node> lhs_ptr;
+    std::shared_ptr<Node> rhs_ptr;
 
 public:
-    Division(std::shared_ptr<Term> const &lhs, std::shared_ptr<Term> const &rhs);
+    Division(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
+
+    std::shared_ptr<Node> LhsPtr() const;
+    std::shared_ptr<Node> RhsPtr() const;
 
     double Value() const override;
 };
 
-class Addition : public Term
+class Addition : public Node
 {
-    std::shared_ptr<Term> lhs;
-    std::shared_ptr<Term> rhs;
+    std::shared_ptr<Node> lhs_ptr;
+    std::shared_ptr<Node> rhs_ptr;
 
 public:
-    Addition(std::shared_ptr<Term> const &lhs, std::shared_ptr<Term> const &rhs);
+    Addition(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
+
+    std::shared_ptr<Node> LhsPtr() const;
+    std::shared_ptr<Node> RhsPtr() const;
 
     double Value() const override;
 };
 
-class Subtraction : public Term
+class Subtraction : public Node
 {
-    std::shared_ptr<Term> lhs;
-    std::shared_ptr<Term> rhs;
+    std::shared_ptr<Node> lhs_ptr;
+    std::shared_ptr<Node> rhs_ptr;
 
 public:
-    Subtraction(std::shared_ptr<Term> const &lhs, std::shared_ptr<Term> const &rhs);
+    Subtraction(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
+
+    std::shared_ptr<Node> LhsPtr() const;
+    std::shared_ptr<Node> RhsPtr() const;
 
     double Value() const override;
 };
