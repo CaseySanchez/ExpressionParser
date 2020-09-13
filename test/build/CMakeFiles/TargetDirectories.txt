@@ -1,3 +1,0 @@
-/home/casey/Desktop/ExpressionParser/test/build/CMakeFiles/rebuild_cache.dir
-/home/casey/Desktop/ExpressionParser/test/build/CMakeFiles/edit_cache.dir
-/home/casey/Desktop/ExpressionParser/test/build/CMakeFiles/ExpressionParserTest.dir
