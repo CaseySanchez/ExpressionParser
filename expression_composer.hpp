@@ -25,5 +25,5 @@ public:
     std::string Compose() const;
 
 private:
-    std::string Traverse(std::shared_ptr<Node> const &node_ptr, uint32_t precedence = ~0) const;
+    std::string Compose(std::shared_ptr<Node> const &node_ptr, uint32_t precedence = ~0) const;
 };
