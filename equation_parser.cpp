@@ -1,6 +1,6 @@
 /*
  * Copyright 2020 Casey Sanchez
- */
+ */ 
 
 #include "equation_parser.hpp"
 
