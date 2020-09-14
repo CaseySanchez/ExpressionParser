@@ -1,3 +1,7 @@
+/*
+ * Copyright 2020 Casey Sanchez
+ */
+
 #include "equation_parser.hpp"
 
 EquationParser::EquationParser(std::string const &equation_str, std::map<std::string, std::shared_ptr<Node>> const &node_map, std::shared_ptr<ExpressionParserContext> const &parser_context)
