@@ -6,12 +6,16 @@
 
 Cos::Cos(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
 {
-    type = "Cos";
 }
 
 std::shared_ptr<Node> Cos::NodePtr() const
 {
     return node_ptr;
+}
+
+std::string Cos::Type() const
+{
+    return "Cos";
 }
 
 double Cos::Value() const
@@ -21,12 +25,16 @@ double Cos::Value() const
 
 Sin::Sin(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
 {
-    type = "Sin";
 }
 
 std::shared_ptr<Node> Sin::NodePtr() const
 {
     return node_ptr;
+}
+
+std::string Sin::Type() const
+{
+    return "Sin";
 }
 
 double Sin::Value() const
@@ -36,12 +44,16 @@ double Sin::Value() const
 
 Tan::Tan(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
 {
-    type = "Tan";
 }
 
 std::shared_ptr<Node> Tan::NodePtr() const
 {
     return node_ptr;
+}
+
+std::string Tan::Type() const
+{
+    return "Tan";
 }
 
 double Tan::Value() const
@@ -51,12 +63,16 @@ double Tan::Value() const
 
 Acos::Acos(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
 {
-    type = "Acos";
 }
 
 std::shared_ptr<Node> Acos::NodePtr() const
 {
     return node_ptr;
+}
+
+std::string Acos::Type() const
+{
+    return "Acos";
 }
 
 double Acos::Value() const
@@ -66,12 +82,16 @@ double Acos::Value() const
 
 Asin::Asin(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
 {
-    type = "Asin";
 }
 
 std::shared_ptr<Node> Asin::NodePtr() const
 {
     return node_ptr;
+}
+
+std::string Asin::Type() const
+{
+    return "Asin";
 }
 
 double Asin::Value() const
@@ -81,12 +101,16 @@ double Asin::Value() const
 
 Atan::Atan(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
 {
-    type = "Atan";
 }
 
 std::shared_ptr<Node> Atan::NodePtr() const
 {
     return node_ptr;
+}
+
+std::string Atan::Type() const
+{
+    return "Atan";
 }
 
 double Atan::Value() const
@@ -96,12 +120,16 @@ double Atan::Value() const
 
 Sqrt::Sqrt(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
 {
-    type = "Sqrt";
 }
 
 std::shared_ptr<Node> Sqrt::NodePtr() const
 {
     return node_ptr;
+}
+
+std::string Sqrt::Type() const
+{
+    return "Sqrt";
 }
 
 double Sqrt::Value() const
@@ -111,12 +139,16 @@ double Sqrt::Value() const
 
 Abs::Abs(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
 {
-    type = "Abs";
 }
 
 std::shared_ptr<Node> Abs::NodePtr() const
 {
     return node_ptr;
+}
+
+std::string Abs::Type() const
+{
+    return "Abs";
 }
 
 double Abs::Value() const
@@ -126,12 +158,16 @@ double Abs::Value() const
 
 Exp::Exp(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
 {
-    type = "Exp";
 }
 
 std::shared_ptr<Node> Exp::NodePtr() const
 {
     return node_ptr;
+}
+
+std::string Exp::Type() const
+{
+    return "Exp";
 }
 
 double Exp::Value() const
@@ -141,12 +177,16 @@ double Exp::Value() const
 
 Log::Log(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
 {
-    type = "Log";
 }
 
 std::shared_ptr<Node> Log::NodePtr() const
 {
     return node_ptr;
+}
+
+std::string Log::Type() const
+{
+    return "Log";
 }
 
 double Log::Value() const

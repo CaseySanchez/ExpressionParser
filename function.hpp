@@ -18,6 +18,8 @@ public:
 
     std::shared_ptr<Node> NodePtr() const;
 
+    std::string Type() const override;
+
     double Value() const override;
 };
 
@@ -29,6 +31,8 @@ public:
     Sin(std::shared_ptr<Node> const &node_ptr);
 
     std::shared_ptr<Node> NodePtr() const;
+
+    std::string Type() const override;
 
     double Value() const override;
 };
@@ -42,6 +46,8 @@ public:
 
     std::shared_ptr<Node> NodePtr() const;
 
+    std::string Type() const override;
+
     double Value() const override;
 };
 
@@ -53,6 +59,8 @@ public:
     Acos(std::shared_ptr<Node> const &node_ptr);
 
     std::shared_ptr<Node> NodePtr() const;
+
+    std::string Type() const override;
 
     double Value() const override;
 };
@@ -66,6 +74,8 @@ public:
 
     std::shared_ptr<Node> NodePtr() const;
 
+    std::string Type() const override;
+
     double Value() const override;
 };
 
@@ -77,6 +87,8 @@ public:
     Atan(std::shared_ptr<Node> const &node_ptr);
 
     std::shared_ptr<Node> NodePtr() const;
+
+    std::string Type() const override;
 
     double Value() const override;
 };
@@ -90,6 +102,8 @@ public:
 
     std::shared_ptr<Node> NodePtr() const;
 
+    std::string Type() const override;
+
     double Value() const override;
 };
 
@@ -101,6 +115,8 @@ public:
     Abs(std::shared_ptr<Node> const &node_ptr);
 
     std::shared_ptr<Node> NodePtr() const;
+
+    std::string Type() const override;
 
     double Value() const override;
 };
@@ -114,6 +130,8 @@ public:
 
     std::shared_ptr<Node> NodePtr() const;
 
+    std::string Type() const override;
+
     double Value() const override;
 };
 
@@ -125,6 +143,8 @@ public:
     Log(std::shared_ptr<Node> const &node_ptr);
 
     std::shared_ptr<Node> NodePtr() const;
+
+    std::string Type() const override;
 
     double Value() const override;
 };

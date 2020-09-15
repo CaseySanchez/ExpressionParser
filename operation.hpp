@@ -18,6 +18,8 @@ public:
 
     std::shared_ptr<Node> NodePtr() const;
 
+    std::string Type() const override;
+
     double Value() const override;
 };
 
@@ -29,6 +31,8 @@ public:
     Negation(std::shared_ptr<Node> const &node_ptr);
 
     std::shared_ptr<Node> NodePtr() const;
+
+    std::string Type() const override;
 
     double Value() const override;
 };
@@ -44,6 +48,8 @@ public:
     std::shared_ptr<Node> LhsPtr() const;
     std::shared_ptr<Node> RhsPtr() const;
 
+    std::string Type() const override;
+
     double Value() const override;
 };
 
@@ -57,6 +63,8 @@ public:
 
     std::shared_ptr<Node> LhsPtr() const;
     std::shared_ptr<Node> RhsPtr() const;
+
+    std::string Type() const override;
 
     double Value() const override;
 };
@@ -72,6 +80,8 @@ public:
     std::shared_ptr<Node> LhsPtr() const;
     std::shared_ptr<Node> RhsPtr() const;
 
+    std::string Type() const override;
+
     double Value() const override;
 };
 
@@ -86,6 +96,8 @@ public:
     std::shared_ptr<Node> LhsPtr() const;
     std::shared_ptr<Node> RhsPtr() const;
 
+    std::string Type() const override;
+
     double Value() const override;
 };
 
@@ -99,6 +111,8 @@ public:
 
     std::shared_ptr<Node> LhsPtr() const;
     std::shared_ptr<Node> RhsPtr() const;
+
+    std::string Type() const override;
 
     double Value() const override;
 };

@@ -6,12 +6,11 @@
 
 Node::Node(double const &value) : value(value)
 {
-    type = "Node";
 }
 
 std::string Node::Type() const
 {
-    return type;
+    return "Node";
 }
 
 double Node::Value() const
@@ -21,7 +20,11 @@ double Node::Value() const
 
 Variable::Variable(double const &value) : Node(value)
 {
-    type = "Variable";
+}
+
+std::string Variable::Type() const
+{
+    return "Variable";
 }
 
 std::string Variable::Name() const
@@ -38,5 +41,9 @@ Node &Variable::operator=(double const &value)
 
 Constant::Constant(double const &value) : Node(value)
 {
-    type = "Constant";
+}
+
+std::string Constant::Type() const
+{
+    return "Constant";
 }
