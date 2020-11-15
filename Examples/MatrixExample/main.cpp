@@ -17,13 +17,14 @@ int main(int argc, char *argv[])
 
         std::map<std::string, std::shared_ptr<Node>> node_map = { { "theta", theta }, { "x", x }, { "y", y } };
 
-        std::string expression_str = "\\begin{bmatrix} cos\\left(theta\\right) & -sin\\left(theta\\right) \\\\ sin\\left(theta\\right) & cos\\left(theta\\right) \\end{bmatrix} * \\begin{bmatrix} x \\\\ y \\end{bmatrix}";
+        //std::string expression_str = "\\begin{bmatrix} cos\\left(theta\\right) & -sin\\left(theta\\right) \\\\ sin\\left(theta\\right) & cos\\left(theta\\right) \\end{bmatrix} * \\begin{bmatrix} x \\\\ y \\end{bmatrix}";
+        std::string expression_str = "\\begin{bmatrix} \\begin{bmatrix} 1 & 2 \\end{bmatrix} & \\begin{bmatrix} 3 & 4 \\end{bmatrix} \\\\ \\begin{bmatrix} 5 & 6 \\end{bmatrix} & \\begin{bmatrix} 7 & 8 \\end{bmatrix} \\end{bmatrix} * \\begin{bmatrix} \\begin{bmatrix} 1 \\\\ 2 \\end{bmatrix} & \\begin{bmatrix} 3 \\\\ 4 \\end{bmatrix} \\\\ \\begin{bmatrix} 5 \\\\ 6 \\end{bmatrix} & \\begin{bmatrix} 7 \\\\ 8 \\end{bmatrix} \\end{bmatrix}";
 
         ExpressionParser expression_parser(expression_str, node_map);
 
         std::shared_ptr<Node> matrix_node(expression_parser.Parse());
 
-        std::cout << expression_str << std::endl << " = " << std::endl << std::get<Matrix>(matrix_node->Value()) << std::endl;
+        std::cout << expression_str << std::endl << " = " << std::endl << matrix_node << std::endl;
         
         ExpressionComposer expression_composer(matrix_node, node_map);
 

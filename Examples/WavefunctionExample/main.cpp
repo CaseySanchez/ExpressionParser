@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
                     *y = radius * std::sin(theta) * std::sin(phi);
                     *z = radius * std::cos(theta);
 
-                    std::cout << "psi(" << radius << ", " << theta << ", " << phi << ") = " << std::get<std::complex<double>>(psi->Value()) << std::endl;
+                    std::cout << "psi(" << radius << ", " << theta << ", " << phi << ") = " << psi << std::endl;
                 }
             }
         }
