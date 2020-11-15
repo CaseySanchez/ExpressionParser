@@ -23,7 +23,7 @@ std::ostream &operator<<(std::ostream &ostream, Node const &node)
     auto value = node.Value();
 
     if (std::holds_alternative<std::complex<double>>(value)) {
-        ostream << std::get<std::complex<double>>(value);
+        ostream << "\\left(" << std::get<std::complex<double>>(value).real() << "+" << std::get<std::complex<double>>(value).imag() << "i\\right)";
     }
     else if (std::holds_alternative<Matrix>(value)) {
         ostream << std::get<Matrix>(value);

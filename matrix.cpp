@@ -243,7 +243,7 @@ std::ostream &operator<<(std::ostream &ostream, Matrix const &matrix)
 
     for (size_t i = 0; i < matrix.Rows(); ++i) {
         for (size_t j = 0; j < matrix.Cols(); ++j) {
-            ostream << std::get<std::complex<double>>(matrix(i, j)->Value());
+            ostream << matrix(i, j);
 
             if (j < matrix.Cols() - 1) {
                 ostream << "&";
