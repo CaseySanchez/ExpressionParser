@@ -18,6 +18,27 @@ std::variant<Matrix, std::complex<double>> Node::Value() const
     return m_value;
 }
 
+std::ostream &operator<<(std::ostream &ostream, Node const &node)
+{
+    auto value = node.Value();
+
+    if (std::holds_alternative<std::complex<double>>(value)) {
+        ostream << std::get<std::complex<double>>(value);
+    }
+    else if (std::holds_alternative<Matrix>(value)) {
+        ostream << std::get<Matrix>(value);
+    }
+
+    return ostream;
+}
+
+std::ostream &operator<<(std::ostream &ostream, std::shared_ptr<Node> const &node_ptr)
+{
+    ostream << *node_ptr;
+
+    return ostream;
+}
+
 Variable::Variable(std::complex<double> const &value) : Node(value)
 {
 }

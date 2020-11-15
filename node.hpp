@@ -23,6 +23,9 @@ public:
     virtual std::string Type() const;
 
     virtual std::variant<Matrix, std::complex<double>> Value() const;
+
+    friend std::ostream &operator<<(std::ostream &ostream, Node const &node);
+    friend std::ostream &operator<<(std::ostream &ostream, std::shared_ptr<Node> const &node_ptr);
 };
 
 class Variable : public Node
