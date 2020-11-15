@@ -11,5 +11,4 @@ set_property(TARGET ExpressionParser PROPERTY CXX_STANDARD 17)
 link_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/Examples/MatrixExample)
-add_subdirectory(${PROJECT_SOURCE_DIR}/Examples/WavefunctionExample)
+add_subdirectory(Examples)
