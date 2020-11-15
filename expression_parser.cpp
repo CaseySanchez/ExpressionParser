@@ -87,7 +87,7 @@ std::string ExpressionParser::Matrices(std::string const &expression_str)
         size_t cols = elements.front().size();
 
         if (!std::all_of(std::next(std::cbegin(elements)), std::cend(elements), [&cols](std::vector<std::shared_ptr<Node>> const &element) -> bool { return element.size() == cols; })) {
-            throw std::invalid_argument("Matrix is not fully populated with elements");
+            throw std::invalid_argument("Matrix is ill-formed: " + matrix_match[3].str());
         }
         
         std::vector<std::shared_ptr<Node>> flattened;
@@ -165,8 +165,6 @@ std::shared_ptr<Node> ExpressionParser::Brackets(std::string const &expression_s
             std::shared_ptr<Node> expression_ptr = Operations(bracket_match[3].str());
 
             if (std::regex_search(bracket_match[1].first, bracket_match[1].second, function_match, function_regex)) {
-                //std::cout << function_match.str() << std::endl;
-                
                 if (!function_match[3].str().empty()) {
                     std::shared_ptr<Node> function_ptr;
 
