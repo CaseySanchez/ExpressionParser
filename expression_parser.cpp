@@ -6,26 +6,31 @@
 
 std::shared_ptr<ExpressionParserContext> const ExpressionParserContext::default_context(new ExpressionParserContext());
 
-ExpressionParserContext::ExpressionParserContext() : expression_id(0), function_id(0), constant_id(0)
+ExpressionParserContext::ExpressionParserContext() : m_expression_id(0), m_function_id(0), m_constant_id(0), m_matrix_id(0)
 {
 }
 
 std::string ExpressionParserContext::NextExpressionName()
 {
-    return "E_" + std::to_string(expression_id++);
+    return "E_" + std::to_string(m_expression_id++);
 }
 
 std::string ExpressionParserContext::NextFunctionName()
 {
-    return "F_" + std::to_string(function_id++);
+    return "F_" + std::to_string(m_function_id++);
 }
 
 std::string ExpressionParserContext::NextConstantName()
 {
-    return "C_" + std::to_string(constant_id++);
+    return "C_" + std::to_string(m_constant_id++);
 }
 
-ExpressionParser::ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map, std::shared_ptr<ExpressionParserContext> const &parser_context) : expression_str(expression_str), node_map(node_map), parser_context(parser_context)
+std::string ExpressionParserContext::NextMatrixName()
+{
+    return "M_" + std::to_string(m_matrix_id++);
+}
+
+ExpressionParser::ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map, std::shared_ptr<ExpressionParserContext> const &parser_context) : m_expression_str(expression_str), m_node_map(node_map), m_parser_context(parser_context)
 {
     Clean();
 
@@ -34,14 +39,16 @@ ExpressionParser::ExpressionParser(std::string const &expression_str, std::map<s
 
 std::shared_ptr<Node> ExpressionParser::Parse()
 {
+    std::string expression_str = Matrices(m_expression_str);
+
     return Brackets(expression_str);
 }
 
 void ExpressionParser::Clean()
 {
-    expression_str.erase(std::remove_if(std::begin(expression_str), std::end(expression_str), ::isspace), std::end(expression_str));
+    m_expression_str.erase(std::remove_if(std::begin(m_expression_str), std::end(m_expression_str), ::isspace), std::end(m_expression_str));
 
-    if (expression_str.empty()) {
+    if (m_expression_str.empty()) {
         throw std::invalid_argument("Expression is empty");
     }
 }
@@ -52,76 +59,197 @@ void ExpressionParser::Verify()
 
     std::smatch reserved_match;
 
-    for (auto [node_name, node_ptr] : node_map) {
+    for (auto const &[node_name, node_ptr] : m_node_map) {
         if (std::regex_search(std::cbegin(node_name), std::cend(node_name), reserved_match, reserved_regex)) {
             throw std::invalid_argument("Reserved node name: " + node_name);
         }
     }
 }
 
+std::string ExpressionParser::Matrices(std::string const &expression_str)
+{
+    std::regex matrix_regex("^(.*)(\\\\begin\\{bmatrix\\})(.*?)(\\\\end\\{bmatrix\\})(.*)$");
+    
+    std::smatch matrix_match;
+
+    if (std::regex_search(std::cbegin(expression_str), std::cend(expression_str), matrix_match, matrix_regex)) {
+        std::vector<std::vector<std::shared_ptr<Node>>> elements;
+        
+        Rows(matrix_match[3].str(), elements);
+
+        size_t rows = elements.size();
+        size_t cols = elements.front().size();
+
+        if (!std::all_of(std::next(std::cbegin(elements)), std::cend(elements), [&cols](std::vector<std::shared_ptr<Node>> const &element) -> bool { return element.size() == cols; })) {
+            throw std::invalid_argument("Matrix is not fully populated with elements");
+        }
+        
+        std::vector<std::shared_ptr<Node>> flattened;
+
+        for (std::vector<std::shared_ptr<Node>> const &element : elements) {
+            std::copy(std::cbegin(element), std::cend(element), std::back_inserter(flattened));
+        }
+
+        std::string matrix_name = m_parser_context->NextMatrixName();
+
+        m_node_map.emplace(matrix_name, std::shared_ptr<Node>(new Node(Matrix(rows, cols, flattened))));
+
+        return Matrices(matrix_match[1].str() + matrix_name + matrix_match[5].str());
+    }
+
+    return expression_str;
+}
+
+void ExpressionParser::Cols(std::string const &expression_str, std::vector<std::shared_ptr<Node>> &col_elements)
+{
+    std::regex matrix_col_regex("^(.*?)(\\&)(.*)$");
+    std::smatch matrix_col_match;
+
+    if (std::regex_search(std::cbegin(expression_str), std::cend(expression_str), matrix_col_match, matrix_col_regex)) {
+        ExpressionParser expression_parser(matrix_col_match[1].str(), m_node_map, m_parser_context);
+
+        col_elements.emplace_back(expression_parser.Parse());
+
+        Cols(matrix_col_match[3].str(), col_elements);
+    }
+    else {
+        ExpressionParser expression_parser(expression_str, m_node_map, m_parser_context);
+
+        col_elements.emplace_back(expression_parser.Parse());
+    }
+}
+
+void ExpressionParser::Rows(std::string const &expression_str, std::vector<std::vector<std::shared_ptr<Node>>> &row_elements)
+{
+    std::regex matrix_row_regex("^(.*?)(\\\\\\\\)(.*)$");
+    std::smatch matrix_row_match;
+
+    if (std::regex_search(std::cbegin(expression_str), std::cend(expression_str), matrix_row_match, matrix_row_regex)) {
+        std::vector<std::shared_ptr<Node>> col_elements;
+
+        Cols(matrix_row_match[1].str(), col_elements);
+        
+        row_elements.emplace_back(col_elements);
+
+        Rows(matrix_row_match[3].str(), row_elements);
+    }
+    else {
+        std::vector<std::shared_ptr<Node>> col_elements;
+
+        Cols(expression_str, col_elements);
+
+        row_elements.emplace_back(col_elements);
+    }
+}
+
 std::shared_ptr<Node> ExpressionParser::Brackets(std::string const &expression_str)
 {
-    std::regex bracket_regex("^(.*)([\\(\\[\\{])(.*?)([\\)\\]\\}])(.*)$");
-    std::regex function_regex("^(.*[\\+\\-\\*\\/\\^\\(\\[\\{])?(.*)$");
+    std::regex bracket_regex("^(.*)(\\\\left\\(|\\\\left\\[|\\\\left\\{)(.*?)(\\\\right\\)|\\\\right\\]|\\\\right\\})(.*)$");
+    std::regex function_regex("^(.*)(\\+|\\-|\\*|\\/|\\^|\\\\left\\(|\\\\left\\[|\\\\left\\{)(.*)$|^(.*)$");
     
     std::smatch bracket_match;
     std::smatch function_match;
 
     if (std::regex_search(std::cbegin(expression_str), std::cend(expression_str), bracket_match, bracket_regex)) {
-        if ((bracket_match[2].str() == "(" && bracket_match[4].str() == ")") || 
-            (bracket_match[2].str() == "[" && bracket_match[4].str() == "]") || 
-            (bracket_match[2].str() == "{" && bracket_match[4].str() == "}")) {
+        if ((bracket_match[2].str() == "\\left(" && bracket_match[4].str() == "\\right)") || 
+            (bracket_match[2].str() == "\\left[" && bracket_match[4].str() == "\\right]") || 
+            (bracket_match[2].str() == "\\left{" && bracket_match[4].str() == "\\right}")) {
             std::shared_ptr<Node> expression_ptr = Operations(bracket_match[3].str());
 
             if (std::regex_search(bracket_match[1].first, bracket_match[1].second, function_match, function_regex)) {
-                if (!function_match[2].str().empty()) {
+                //std::cout << function_match.str() << std::endl;
+                
+                if (!function_match[3].str().empty()) {
                     std::shared_ptr<Node> function_ptr;
 
-                    if (function_match[2].str() == "cos") {
+                    if (function_match[3].str() == "cos") {
                         function_ptr = std::shared_ptr<Cos>(new Cos(expression_ptr));
                     }
-                    else if (function_match[2].str() == "sin") {
+                    else if (function_match[3].str() == "sin") {
                         function_ptr = std::shared_ptr<Sin>(new Sin(expression_ptr));
                     }
-                    else if (function_match[2].str() == "tan") {
+                    else if (function_match[3].str() == "tan") {
                         function_ptr = std::shared_ptr<Tan>(new Tan(expression_ptr));
                     }
-                    else if (function_match[2].str() == "acos") {
+                    else if (function_match[3].str() == "acos") {
                         function_ptr = std::shared_ptr<Acos>(new Acos(expression_ptr));
                     }
-                    else if (function_match[2].str() == "asin") {
+                    else if (function_match[3].str() == "asin") {
                         function_ptr = std::shared_ptr<Asin>(new Asin(expression_ptr));
                     }
-                    else if (function_match[2].str() == "atan") {
+                    else if (function_match[3].str() == "atan") {
                         function_ptr = std::shared_ptr<Atan>(new Atan(expression_ptr));
                     }
-                    else if (function_match[2].str() == "sqrt") {
+                    else if (function_match[3].str() == "sqrt") {
                         function_ptr = std::shared_ptr<Sqrt>(new Sqrt(expression_ptr));
                     }
-                    else if (function_match[2].str() == "abs") {
+                    else if (function_match[3].str() == "abs") {
                         function_ptr = std::shared_ptr<Abs>(new Abs(expression_ptr));
                     }
-                    else if (function_match[2].str() == "exp") {
+                    else if (function_match[3].str() == "exp") {
                         function_ptr = std::shared_ptr<Exp>(new Exp(expression_ptr));
                     }
-                    else if (function_match[2].str() == "log") {
+                    else if (function_match[3].str() == "log") {
                         function_ptr = std::shared_ptr<Log>(new Log(expression_ptr));
                     }
                     else {
-                        throw std::invalid_argument("Unrecognized function: " + function_match[2].str());
+                        throw std::invalid_argument("Unrecognized function: " + function_match[3].str());
                     }
                     
-                    std::string function_name = parser_context->NextFunctionName();
+                    std::string function_name = m_parser_context->NextFunctionName();
 
-                    node_map.emplace(function_name, function_ptr);
+                    m_node_map.emplace(function_name, function_ptr);
+                    
+                    return Brackets(function_match[1].str() + function_match[2].str() + function_name + bracket_match[5].str());
+                }
+                else if (!function_match[4].str().empty()) {
+                    std::shared_ptr<Node> function_ptr;
 
-                    return Brackets(function_match[1].str() + function_name + bracket_match[5].str());
+                    if (function_match[4].str() == "cos") {
+                        function_ptr = std::shared_ptr<Cos>(new Cos(expression_ptr));
+                    }
+                    else if (function_match[4].str() == "sin") {
+                        function_ptr = std::shared_ptr<Sin>(new Sin(expression_ptr));
+                    }
+                    else if (function_match[4].str() == "tan") {
+                        function_ptr = std::shared_ptr<Tan>(new Tan(expression_ptr));
+                    }
+                    else if (function_match[4].str() == "acos") {
+                        function_ptr = std::shared_ptr<Acos>(new Acos(expression_ptr));
+                    }
+                    else if (function_match[4].str() == "asin") {
+                        function_ptr = std::shared_ptr<Asin>(new Asin(expression_ptr));
+                    }
+                    else if (function_match[4].str() == "atan") {
+                        function_ptr = std::shared_ptr<Atan>(new Atan(expression_ptr));
+                    }
+                    else if (function_match[4].str() == "sqrt") {
+                        function_ptr = std::shared_ptr<Sqrt>(new Sqrt(expression_ptr));
+                    }
+                    else if (function_match[4].str() == "abs") {
+                        function_ptr = std::shared_ptr<Abs>(new Abs(expression_ptr));
+                    }
+                    else if (function_match[4].str() == "exp") {
+                        function_ptr = std::shared_ptr<Exp>(new Exp(expression_ptr));
+                    }
+                    else if (function_match[4].str() == "log") {
+                        function_ptr = std::shared_ptr<Log>(new Log(expression_ptr));
+                    }
+                    else {
+                        throw std::invalid_argument("Unrecognized function: " + function_match[4].str());
+                    }
+                    
+                    std::string function_name = m_parser_context->NextFunctionName();
+
+                    m_node_map.emplace(function_name, function_ptr);
+                    
+                    return Brackets(function_name + bracket_match[5].str());
                 }
             }
 
-            std::string expression_name = parser_context->NextExpressionName();
+            std::string expression_name = m_parser_context->NextExpressionName();
 
-            node_map.emplace(expression_name, expression_ptr);
+            m_node_map.emplace(expression_name, expression_ptr);
 
             return Brackets(bracket_match[1].str() + expression_name + bracket_match[5].str());
         }
@@ -190,17 +318,17 @@ std::shared_ptr<Node> ExpressionParser::Nodes(std::string const &node_str)
     try {
         double value = std::stod(node_str);
 
-        std::string constant_name = parser_context->NextConstantName();
+        std::string constant_name = m_parser_context->NextConstantName();
         
         std::shared_ptr<Constant> constant_ptr(new Constant(value));
 
-        node_map.emplace(constant_name, constant_ptr);
+        m_node_map.emplace(constant_name, constant_ptr);
 
         return constant_ptr;
     }
     catch (std::invalid_argument const &) {
         try {
-            return node_map.at(node_str);
+            return m_node_map.at(node_str);
         }
         catch(std::out_of_range const &) {
             throw std::invalid_argument("No node provided for: " + node_str);

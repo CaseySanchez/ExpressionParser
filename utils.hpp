@@ -5,5 +5,6 @@
 #pragma once
 
 #include <cmath>
+#include <complex>
 
-bool Approximately(double const &lhs, double const &rhs, double const epsilon = 1e-5);
+bool Approximately(std::complex<double> const &lhs, std::complex<double> const &rhs, double const epsilon = 1e-5);

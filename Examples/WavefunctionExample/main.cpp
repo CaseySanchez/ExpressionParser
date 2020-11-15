@@ -4,9 +4,9 @@
 
 #include <iostream> 
 
-#include "expression_parser.hpp"
-#include "expression_composer.hpp"
-#include "expression_simplifier.hpp"
+#include <expression_parser.hpp>
+#include <expression_composer.hpp>
+#include <expression_simplifier.hpp>
 
 int main(int argc, char *argv[])
 {
@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
         std::map<std::string, std::shared_ptr<Node>> node_map = { { "pi", pi }, { "e", e }, { "x", x }, { "y", y }, { "z", z } };
 
-        ExpressionParser expression_parser("pi ^ { -3 / 2 } * e ^ { - ( x ^ 2 + y ^ 2 + z ^ 2 ) }", node_map);
+        ExpressionParser expression_parser("pi ^ \\left{ -3 / 2 \\right} * e ^ \\left{ - \\left( x ^ 2 + y ^ 2 + z ^ 2 \\right) \\right}", node_map);
         
         std::shared_ptr<Node> psi = expression_parser.Parse();
 
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
                     *y = radius * std::sin(theta) * std::sin(phi);
                     *z = radius * std::cos(theta);
 
-                    std::cout << "psi(" << radius << ", " << theta << ", " << phi << ") = " << psi->Value() << std::endl;
+                    std::cout << "psi(" << radius << ", " << theta << ", " << phi << ") = " << std::get<std::complex<double>>(psi->Value()) << std::endl;
                 }
             }
         }

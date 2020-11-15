@@ -4,41 +4,74 @@
 
 #include "expression_composer.hpp"
 
-ExpressionComposer::ExpressionComposer(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map) : node_ptr(node_ptr), node_map(node_map)
+ExpressionComposer::ExpressionComposer(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map) : m_node_ptr(node_ptr), m_node_map(node_map)
 {
 }
 
 std::string ExpressionComposer::Compose() const
 {
-    return Compose(node_ptr);
+    return Compose(m_node_ptr);
 }
 
-std::string ExpressionComposer::Compose(std::shared_ptr<Node> const &node_ptr, uint32_t precedence) const
+std::string ExpressionComposer::Compose(std::shared_ptr<Node> const &node_ptr, uint32_t const &precedence) const
 {
-    if (node_ptr->Type() == "Variable") {
-        auto node_it = std::find_if(std::cbegin(node_map), std::cend(node_map), 
-            [node_ptr](std::pair<std::string, std::shared_ptr<Node>> const &node_pair) {  
+    if (node_ptr->Type() == "Node") {
+        if (std::holds_alternative<Matrix>(node_ptr->Value())) {
+            Matrix matrix = std::get<Matrix>(node_ptr->Value());
+
+            std::ostringstream result;
+            
+            result << "\\begin{bmatrix}";
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    ExpressionComposer expression_composer(matrix(i, j), m_node_map);
+
+                    result << expression_composer.Compose();
+            
+                    if (j < matrix.Cols() - 1) {
+                        result << "&";
+                    }
+                }
+
+                if (i < matrix.Rows() - 1) {
+                    result << "\\\\";
+                }
+            }
+
+            result << "\\end{bmatrix}";
+
+            return result.str();
+        }
+    }
+    else if (node_ptr->Type() == "Variable") {
+        auto node_it = std::find_if(std::cbegin(m_node_map), std::cend(m_node_map), 
+            [&node_ptr](std::pair<std::string, std::shared_ptr<Node>> const &node_pair) {  
                 return node_pair.second == node_ptr;
             });
 
-        if (node_it != std::cend(node_map)) {
+        if (node_it != std::cend(m_node_map)) {
             return node_it->first;
         }
         else {
-            return std::to_string(node_ptr->Value());
+            return "\\left(" + std::to_string(std::get<std::complex<double>>(node_ptr->Value()).real()) + "+" + std::to_string(std::get<std::complex<double>>(node_ptr->Value()).imag()) + "i)";
         }
     }
     else if (node_ptr->Type() == "Constant") {
-        auto node_it = std::find_if(std::cbegin(node_map), std::cend(node_map), 
-            [node_ptr](std::pair<std::string, std::shared_ptr<Node>> const &node_pair) {  
+        auto node_it = std::find_if(std::cbegin(m_node_map), std::cend(m_node_map), 
+            [&node_ptr](std::pair<std::string, std::shared_ptr<Node>> const &node_pair) {  
                 return node_pair.second == node_ptr;
             });
 
-        if (node_it != std::cend(node_map)) {
+        if (node_it != std::cend(m_node_map)) {
+            if (precedence < 1) {
+                return "\\left(" + node_it->first + "\\right)";
+            }
+            
             return node_it->first;
         }
         else {
-            return std::to_string(node_ptr->Value());
+            return "\\left(" + std::to_string(std::get<std::complex<double>>(node_ptr->Value()).real()) + "+" + std::to_string(std::get<std::complex<double>>(node_ptr->Value()).imag()) + "i)";
         }
     }
     else if (node_ptr->Type() == "Exponentiation") {
@@ -50,7 +83,7 @@ std::string ExpressionComposer::Compose(std::shared_ptr<Node> const &node_ptr, u
         std::shared_ptr<Affirmation> affirmation = std::dynamic_pointer_cast<Affirmation>(node_ptr);
 
         if (precedence < 1) {
-            return "(+" + Compose(affirmation->NodePtr(), 1) + ")";
+            return "\\left(+" + Compose(affirmation->NodePtr(), 1) + "\\right)";
         }
 
         return "+" + Compose(affirmation->NodePtr(), 1);
@@ -59,7 +92,7 @@ std::string ExpressionComposer::Compose(std::shared_ptr<Node> const &node_ptr, u
         std::shared_ptr<Negation> negation = std::dynamic_pointer_cast<Negation>(node_ptr);
 
         if (precedence < 1) {
-            return "(-" + Compose(negation->NodePtr(), 1) + ")";
+            return "\\left(-" + Compose(negation->NodePtr(), 1) + "\\right)";
         }
 
         return "-" + Compose(negation->NodePtr(), 1);
@@ -68,7 +101,7 @@ std::string ExpressionComposer::Compose(std::shared_ptr<Node> const &node_ptr, u
         std::shared_ptr<Multiplication> multiplication = std::dynamic_pointer_cast<Multiplication>(node_ptr);
 
         if (precedence < 2) {
-            return "(" + Compose(multiplication->LhsPtr(), 2) + "*" + Compose(multiplication->RhsPtr(), 2) + ")";
+            return "\\left(" + Compose(multiplication->LhsPtr(), 2) + "*" + Compose(multiplication->RhsPtr(), 2) + "\\right)";
         }
 
         return Compose(multiplication->LhsPtr(), 2) + "*" + Compose(multiplication->RhsPtr(), 2);
@@ -77,7 +110,7 @@ std::string ExpressionComposer::Compose(std::shared_ptr<Node> const &node_ptr, u
         std::shared_ptr<Division> division = std::dynamic_pointer_cast<Division>(node_ptr);
 
         if (precedence < 2) {
-            return "(" + Compose(division->LhsPtr(), 2) + "/" + Compose(division->RhsPtr(), 2) + ")";
+            return "\\left(" + Compose(division->LhsPtr(), 2) + "/" + Compose(division->RhsPtr(), 2) + "\\right)";
         }
 
         return Compose(division->LhsPtr(), 2) + "/" + Compose(division->RhsPtr(), 2);
@@ -86,7 +119,7 @@ std::string ExpressionComposer::Compose(std::shared_ptr<Node> const &node_ptr, u
         std::shared_ptr<Addition> addition = std::dynamic_pointer_cast<Addition>(node_ptr);
 
         if (precedence < 3) {
-            return "(" + Compose(addition->LhsPtr(), 3) + "+" + Compose(addition->RhsPtr(), 3) + ")";
+            return "\\left(" + Compose(addition->LhsPtr(), 3) + "+" + Compose(addition->RhsPtr(), 3) + "\\right)";
         }
 
         return Compose(addition->LhsPtr(), 3) + "+" + Compose(addition->RhsPtr(), 3);
@@ -95,7 +128,7 @@ std::string ExpressionComposer::Compose(std::shared_ptr<Node> const &node_ptr, u
         std::shared_ptr<Subtraction> subtraction = std::dynamic_pointer_cast<Subtraction>(node_ptr);
 
         if (precedence < 3) {
-            return "(" + Compose(subtraction->LhsPtr(), 3) + "-" + Compose(subtraction->RhsPtr(), 3) + ")";
+            return "\\left(" + Compose(subtraction->LhsPtr(), 3) + "-" + Compose(subtraction->RhsPtr(), 3) + "\\right)";
         }
 
         return Compose(subtraction->LhsPtr(), 3) + "-" + Compose(subtraction->RhsPtr(), 3);

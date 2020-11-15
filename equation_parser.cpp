@@ -17,11 +17,11 @@ EquationParser::EquationParser(std::string const &equation_str, std::map<std::st
     ExpressionParser lhs_expression_parser(equation_match[1].str(), node_map, parser_context);
     ExpressionParser rhs_expression_parser(equation_match[2].str(), node_map, parser_context);
 
-    lhs_ptr = lhs_expression_parser.Parse();
-    rhs_ptr = rhs_expression_parser.Parse();
+    m_lhs_ptr = lhs_expression_parser.Parse();
+    m_rhs_ptr = rhs_expression_parser.Parse();
 }
 
 bool EquationParser::Equal() const
 {
-    return Approximately(lhs_ptr->Value(), rhs_ptr->Value());
+    return Approximately(std::get<std::complex<double>>(m_lhs_ptr->Value()), std::get<std::complex<double>>(m_rhs_ptr->Value()));
 }

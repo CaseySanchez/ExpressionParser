@@ -10,14 +10,15 @@
 #include <algorithm>
 
 #include "node.hpp"
-#include "operation.hpp"
-#include "function.hpp"
+#include "operations.hpp"
+#include "functions.hpp"
+#include "utils.hpp"
 
 class ExpressionComposer
 {
-    std::shared_ptr<Node> node_ptr;
+    std::shared_ptr<Node> m_node_ptr;
 
-    std::map<std::string, std::shared_ptr<Node>> node_map;
+    std::map<std::string, std::shared_ptr<Node>> m_node_map;
 
 public:
     ExpressionComposer(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map = { });
@@ -25,5 +26,5 @@ public:
     std::string Compose() const;
 
 private:
-    std::string Compose(std::shared_ptr<Node> const &node_ptr, uint32_t precedence = ~0) const;
+    std::string Compose(std::shared_ptr<Node> const &node_ptr, uint32_t const &precedence = ~0) const;
 };

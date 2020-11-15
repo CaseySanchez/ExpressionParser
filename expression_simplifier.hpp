@@ -8,13 +8,13 @@
 #include <string>
 
 #include "node.hpp"
-#include "operation.hpp"
-#include "function.hpp"
+#include "operations.hpp"
+#include "functions.hpp"
 #include "utils.hpp"
 
 class ExpressionSimplifier
 {
-    std::shared_ptr<Node> node_ptr;
+    std::shared_ptr<Node> m_node_ptr;
 
 public:
     ExpressionSimplifier(std::shared_ptr<Node> const &node_ptr);

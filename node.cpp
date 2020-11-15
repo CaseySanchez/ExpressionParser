@@ -4,7 +4,7 @@
 
 #include "node.hpp"
 
-Node::Node(double const &value) : value(value)
+Node::Node(std::variant<Matrix, std::complex<double>> const &value) : m_value(value)
 {
 }
 
@@ -13,12 +13,12 @@ std::string Node::Type() const
     return "Node";
 }
 
-double Node::Value() const
+std::variant<Matrix, std::complex<double>> Node::Value() const
 {
-    return value;
+    return m_value;
 }
 
-Variable::Variable(double const &value) : Node(value)
+Variable::Variable(std::complex<double> const &value) : Node(value)
 {
 }
 
@@ -27,19 +27,14 @@ std::string Variable::Type() const
     return "Variable";
 }
 
-std::string Variable::Name() const
+Node &Variable::operator=(std::complex<double> const &value)
 {
-    return name;
-}
-
-Node &Variable::operator=(double const &value)
-{
-    this->value = value;
+    m_value = value;
 
     return *this;
 }
 
-Constant::Constant(double const &value) : Node(value)
+Constant::Constant(std::complex<double> const &value) : Node(value)
 {
 }
 

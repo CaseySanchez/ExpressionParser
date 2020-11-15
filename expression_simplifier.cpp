@@ -4,13 +4,13 @@
 
 #include "expression_simplifier.hpp"
 
-ExpressionSimplifier::ExpressionSimplifier(std::shared_ptr<Node> const &node_ptr) : node_ptr(node_ptr)
+ExpressionSimplifier::ExpressionSimplifier(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
 {
 }
 
 std::shared_ptr<Node> ExpressionSimplifier::Simplify()
 {
-    return Simplify(node_ptr);
+    return Simplify(m_node_ptr);
 }
 
 std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const &node_ptr)
@@ -26,7 +26,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = negation_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(-1.0 * node->Value()));
+            return std::shared_ptr<Constant>(new Constant(-1.0 * std::get<std::complex<double>>(node->Value())));
         }
     }
     else if (node_ptr->Type() == "Exponentiation") {
@@ -36,14 +36,14 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> rhs_ptr = exponentiation_ptr->RhsPtr();
 
         if (rhs_ptr->Type() == "Constant") {
-            if (Approximately(rhs_ptr->Value(), 0.0)) {
+            if (Approximately(std::get<std::complex<double>>(rhs_ptr->Value()), 0.0)) {
                 return std::shared_ptr<Constant>(new Constant(1.0));
             }
-            else if (Approximately(rhs_ptr->Value(), 1.0)) {
+            else if (Approximately(std::get<std::complex<double>>(rhs_ptr->Value()), 1.0)) {
                 return lhs_ptr;
             }
             else if (lhs_ptr->Type() == "Constant") {
-                return std::shared_ptr<Constant>(new Constant(std::pow(lhs_ptr->Value(), rhs_ptr->Value())));
+                return std::shared_ptr<Constant>(new Constant(std::pow(std::get<std::complex<double>>(lhs_ptr->Value()), std::get<std::complex<double>>(rhs_ptr->Value()))));
             }
         }
     }
@@ -54,21 +54,21 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> rhs_ptr = multiplication_ptr->RhsPtr();
 
         if (lhs_ptr->Type() == "Constant") {
-            if (Approximately(lhs_ptr->Value(), 0.0)) {
+            if (Approximately(std::get<std::complex<double>>(lhs_ptr->Value()), 0.0)) {
                 return std::shared_ptr<Constant>(new Constant(0.0));
             }
-            else if (Approximately(lhs_ptr->Value(), 1.0)) {
+            else if (Approximately(std::get<std::complex<double>>(lhs_ptr->Value()), 1.0)) {
                 return rhs_ptr;
             }
             else if (rhs_ptr->Type() == "Constant") {
-                return std::shared_ptr<Constant>(new Constant(lhs_ptr->Value() * rhs_ptr->Value()));
+                return std::shared_ptr<Constant>(new Constant(std::get<std::complex<double>>(lhs_ptr->Value()) * std::get<std::complex<double>>(rhs_ptr->Value())));
             }
         }
         else if (rhs_ptr->Type() == "Constant") {
-            if (Approximately(rhs_ptr->Value(), 0.0)) {
+            if (Approximately(std::get<std::complex<double>>(rhs_ptr->Value()), 0.0)) {
                 return std::shared_ptr<Constant>(new Constant(0.0));
             }
-            else if (Approximately(rhs_ptr->Value(), 1.0)) {
+            else if (Approximately(std::get<std::complex<double>>(rhs_ptr->Value()), 1.0)) {
                 return lhs_ptr;
             }
         }
@@ -80,15 +80,15 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> rhs_ptr = division_ptr->RhsPtr();
 
         if (lhs_ptr->Type() == "Constant") {
-            if (Approximately(lhs_ptr->Value(), 0.0)) {
+            if (Approximately(std::get<std::complex<double>>(lhs_ptr->Value()), 0.0)) {
                 return std::shared_ptr<Constant>(new Constant(0.0));
             }
             else if (rhs_ptr->Type() == "Constant") {
-                return std::shared_ptr<Constant>(new Constant(lhs_ptr->Value() / rhs_ptr->Value()));
+                return std::shared_ptr<Constant>(new Constant(std::get<std::complex<double>>(lhs_ptr->Value()) / std::get<std::complex<double>>(rhs_ptr->Value())));
             }
         }
         else if (rhs_ptr->Type() == "Constant") {
-            if (Approximately(rhs_ptr->Value(), 1.0)) {
+            if (Approximately(std::get<std::complex<double>>(rhs_ptr->Value()), 1.0)) {
                 return lhs_ptr;
             }
         }
@@ -100,15 +100,15 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> rhs_ptr = addition_ptr->RhsPtr();
 
         if (lhs_ptr->Type() == "Constant") {
-            if (Approximately(lhs_ptr->Value(), 0.0)) {
+            if (Approximately(std::get<std::complex<double>>(lhs_ptr->Value()), 0.0)) {
                 return rhs_ptr;
             }
             else if (rhs_ptr->Type() == "Constant") {
-                return std::shared_ptr<Constant>(new Constant(lhs_ptr->Value() + rhs_ptr->Value()));
+                return std::shared_ptr<Constant>(new Constant(std::get<std::complex<double>>(lhs_ptr->Value()) + std::get<std::complex<double>>(rhs_ptr->Value())));
             }
         }
         else if (rhs_ptr->Type() == "Constant") {
-            if (Approximately(rhs_ptr->Value(), 0.0)) {
+            if (Approximately(std::get<std::complex<double>>(rhs_ptr->Value()), 0.0)) {
                 return lhs_ptr;
             }
         }
@@ -121,14 +121,14 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
 
         if (lhs_ptr->Type() == "Constant") {
             if (rhs_ptr->Type() == "Constant") {
-                return std::shared_ptr<Constant>(new Constant(lhs_ptr->Value() - rhs_ptr->Value()));
+                return std::shared_ptr<Constant>(new Constant(std::get<std::complex<double>>(lhs_ptr->Value()) - std::get<std::complex<double>>(rhs_ptr->Value())));
             }
-            else if (Approximately(lhs_ptr->Value(), 0.0)) {
+            else if (Approximately(std::get<std::complex<double>>(lhs_ptr->Value()), 0.0)) {
                 return std::shared_ptr<Negation>(new Negation(rhs_ptr));
             }
         }
         else if (rhs_ptr->Type() == "Constant") {
-            if (Approximately(rhs_ptr->Value(), 0.0)) {
+            if (Approximately(std::get<std::complex<double>>(rhs_ptr->Value()), 0.0)) {
                 return lhs_ptr;
             }
         }
@@ -139,7 +139,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = sin_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::sin(node->Value())));
+            return std::shared_ptr<Constant>(new Constant(std::sin(std::get<std::complex<double>>(node->Value()))));
         }
     }
     else if (node_ptr->Type() == "Cos") {
@@ -148,7 +148,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = cos_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::cos(node->Value())));
+            return std::shared_ptr<Constant>(new Constant(std::cos(std::get<std::complex<double>>(node->Value()))));
         }
     }
     else if (node_ptr->Type() == "Tan") {
@@ -157,7 +157,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = tan_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::tan(node->Value())));
+            return std::shared_ptr<Constant>(new Constant(std::tan(std::get<std::complex<double>>(node->Value()))));
         }
     }
     else if (node_ptr->Type() == "Asin") {
@@ -166,7 +166,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = asin_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::asin(node->Value())));
+            return std::shared_ptr<Constant>(new Constant(std::asin(std::get<std::complex<double>>(node->Value()))));
         }
     }
     else if (node_ptr->Type() == "Acos") {
@@ -175,7 +175,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = acos_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::acos(node->Value())));
+            return std::shared_ptr<Constant>(new Constant(std::acos(std::get<std::complex<double>>(node->Value()))));
         }
     }
     else if (node_ptr->Type() == "Atan") {
@@ -184,7 +184,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = atan_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::atan(node->Value())));
+            return std::shared_ptr<Constant>(new Constant(std::atan(std::get<std::complex<double>>(node->Value()))));
         }
     }
     else if (node_ptr->Type() == "Sqrt") {
@@ -193,7 +193,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = sqrt_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::sqrt(node->Value())));
+            return std::shared_ptr<Constant>(new Constant(std::sqrt(std::get<std::complex<double>>(node->Value()))));
         }
     }
     else if (node_ptr->Type() == "Abs") {
@@ -202,7 +202,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = abs_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::abs(node->Value())));
+            return std::shared_ptr<Constant>(new Constant(std::abs(std::get<std::complex<double>>(node->Value()))));
         }
     }
     else if (node_ptr->Type() == "Exp") {
@@ -211,7 +211,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = exp_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::exp(node->Value())));
+            return std::shared_ptr<Constant>(new Constant(std::exp(std::get<std::complex<double>>(node->Value()))));
         }
     }
     else if (node_ptr->Type() == "Log") {
@@ -220,7 +220,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
         std::shared_ptr<Node> node = log_ptr->NodePtr();
 
         if (node->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::log(node->Value())));
+            return std::shared_ptr<Constant>(new Constant(std::log(std::get<std::complex<double>>(node->Value()))));
         }
     }
 

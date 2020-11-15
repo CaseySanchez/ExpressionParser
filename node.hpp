@@ -5,38 +5,40 @@
 #pragma once
 
 #include <string>
+#include <complex>
+#include <memory>
+#include <vector>
+#include <variant>
+
+#include "matrix.hpp"
 
 class Node
 {
 protected:
-    double value;
+    std::variant<Matrix, std::complex<double>> m_value;
 
 public:
-    Node(double const &value = 0.0);
+    Node(std::variant<Matrix, std::complex<double>> const &value = 0.0);
 
     virtual std::string Type() const;
 
-    virtual double Value() const;
+    virtual std::variant<Matrix, std::complex<double>> Value() const;
 };
 
 class Variable : public Node
 {
-    std::string name;
-
 public:
-    Variable(double const &value = 0.0);
+    Variable(std::complex<double> const &value = 0.0);
 
     std::string Type() const override;
 
-    std::string Name() const;
-
-    Node &operator=(double const &value);
+    Node &operator=(std::complex<double> const &value);
 };
 
 class Constant : public Node
 {
 public:
-    Constant(double const &value);
+    Constant(std::complex<double> const &value);
 
     std::string Type() const override;
 
