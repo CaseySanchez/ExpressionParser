@@ -51,8 +51,11 @@ protected:
 
     std::shared_ptr<ExpressionParserContext> m_parser_context;
 
+private:
+    ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map, std::shared_ptr<ExpressionParserContext> const &parser_context, bool const &clean_and_verify);
+
 public:
-    ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map = { }, std::shared_ptr<ExpressionParserContext> const &context = ExpressionParserContext::default_context);
+    ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map = { }, std::shared_ptr<ExpressionParserContext> const &parser_context = ExpressionParserContext::default_context);
 
     std::shared_ptr<Node> Parse();
 

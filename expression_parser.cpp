@@ -30,11 +30,17 @@ std::string ExpressionParserContext::NextMatrixName()
     return "M_" + std::to_string(m_matrix_id++);
 }
 
-ExpressionParser::ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map, std::shared_ptr<ExpressionParserContext> const &parser_context) : m_expression_str(expression_str), m_node_map(node_map), m_parser_context(parser_context)
+ExpressionParser::ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map, std::shared_ptr<ExpressionParserContext> const &parser_context, bool const &clean_and_verify) : m_expression_str(expression_str), m_node_map(node_map), m_parser_context(parser_context)
 {
-    Clean();
+    if (clean_and_verify) {
+        Clean();
 
-    Verify();
+        Verify();
+    }
+}
+
+ExpressionParser::ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map, std::shared_ptr<ExpressionParserContext> const &parser_context) : ExpressionParser(expression_str, node_map, parser_context, true)
+{
 }
 
 std::shared_ptr<Node> ExpressionParser::Parse()
@@ -55,7 +61,7 @@ void ExpressionParser::Clean()
 
 void ExpressionParser::Verify()
 {
-    std::regex reserved_regex("^E_[0-9]+$|^F_[0-9]+$|^C_[0-9]+$");
+    std::regex reserved_regex("^E_[0-9]+$|^F_[0-9]+$|^C_[0-9]+$|^M_[0-9]+$");
 
     std::smatch reserved_match;
 
@@ -92,7 +98,9 @@ std::string ExpressionParser::Matrices(std::string const &expression_str)
 
         std::string matrix_name = m_parser_context->NextMatrixName();
 
-        m_node_map.emplace(matrix_name, std::shared_ptr<Node>(new Node(Matrix(rows, cols, flattened))));
+        std::shared_ptr<Node> matrix_ptr(new Node(Matrix(rows, cols, flattened)));
+
+        m_node_map.emplace(matrix_name, matrix_ptr);
 
         return Matrices(matrix_match[1].str() + matrix_name + matrix_match[5].str());
     }
@@ -106,14 +114,14 @@ void ExpressionParser::Cols(std::string const &expression_str, std::vector<std::
     std::smatch matrix_col_match;
 
     if (std::regex_search(std::cbegin(expression_str), std::cend(expression_str), matrix_col_match, matrix_col_regex)) {
-        ExpressionParser expression_parser(matrix_col_match[1].str(), m_node_map, m_parser_context);
+        ExpressionParser expression_parser(matrix_col_match[1].str(), m_node_map, m_parser_context, false);
 
         col_elements.emplace_back(expression_parser.Parse());
 
         Cols(matrix_col_match[3].str(), col_elements);
     }
     else {
-        ExpressionParser expression_parser(expression_str, m_node_map, m_parser_context);
+        ExpressionParser expression_parser(expression_str, m_node_map, m_parser_context, false);
 
         col_elements.emplace_back(expression_parser.Parse());
     }
