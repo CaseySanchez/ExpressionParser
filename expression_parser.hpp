@@ -56,8 +56,6 @@ public:
 
     std::shared_ptr<Node> Parse();
 
-    // M_1 * (M_2 + { 3 * 5 + 4 })
-
 protected:
     void Clean();
     void Verify();
