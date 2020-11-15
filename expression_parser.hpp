@@ -44,14 +44,12 @@ private:
 
 class ExpressionParser
 {
-protected:
     std::string m_expression_str;
 
     std::map<std::string, std::shared_ptr<Node>> m_node_map;
 
     std::shared_ptr<ExpressionParserContext> m_parser_context;
 
-private:
     ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map, std::shared_ptr<ExpressionParserContext> const &parser_context, bool const &clean_and_verify);
 
 public:
@@ -59,7 +57,7 @@ public:
 
     std::shared_ptr<Node> Parse();
 
-protected:
+private:
     void Clean();
     void Verify();
 
