@@ -13,7 +13,7 @@ Built on Ubuntu 20.04.1 LTS compiled with GCC 9.3.0.
 To build and run "AWSExpressionParser", "Examples", and "Tests":
 ```
 mkdir build && cd build
-cmake -DBUILD_EXAMPLES -DBUILD_TESTS .. && make
+cmake -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON .. && make
 cd Examples/MatrixExample && ./MatrixExample
 cd Examples/GaussianExample && ./GaussianExample
 ```
