@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
             std::cout << "r(" << static_cast<Node>(*theta) << ") * v = " << matrix_node << std::endl;
         }
-
+        
         ExpressionComposer expression_composer(matrix_node, node_map);
 
         std::cout << "Re-composed expression from expression tree: " << std::endl;

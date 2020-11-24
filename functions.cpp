@@ -4,13 +4,11 @@
 
 #include "functions.hpp"
 
-Cos::Cos(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Cos::Cos(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Cos::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Cos accepts only 1 argument");
+    }
 }
 
 std::string Cos::Type() const
@@ -20,16 +18,14 @@ std::string Cos::Type() const
 
 std::variant<Matrix, std::complex<double>> Cos::Value() const
 {
-    return std::cos(std::get<std::complex<double>>(m_node_ptr->Value()));
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Sin::Sin(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Sin::Sin(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Sin::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Sin accepts only 1 argument");
+    }
 }
 
 std::string Sin::Type() const
@@ -39,16 +35,14 @@ std::string Sin::Type() const
 
 std::variant<Matrix, std::complex<double>> Sin::Value() const
 {
-    return std::sin(std::get<std::complex<double>>(m_node_ptr->Value()));
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Tan::Tan(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Tan::Tan(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Tan::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Tan accepts only 1 argument");
+    }
 }
 
 std::string Tan::Type() const
@@ -58,16 +52,14 @@ std::string Tan::Type() const
 
 std::variant<Matrix, std::complex<double>> Tan::Value() const
 {
-    return std::tan(std::get<std::complex<double>>(m_node_ptr->Value()));
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Acos::Acos(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Acos::Acos(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Acos::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Acos accepts only 1 argument");
+    }
 }
 
 std::string Acos::Type() const
@@ -77,16 +69,14 @@ std::string Acos::Type() const
 
 std::variant<Matrix, std::complex<double>> Acos::Value() const
 {
-    return std::acos(std::get<std::complex<double>>(m_node_ptr->Value()));
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Asin::Asin(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Asin::Asin(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Asin::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Asin accepts only 1 argument");
+    }
 }
 
 std::string Asin::Type() const
@@ -96,16 +86,14 @@ std::string Asin::Type() const
 
 std::variant<Matrix, std::complex<double>> Asin::Value() const
 {
-    return std::asin(std::get<std::complex<double>>(m_node_ptr->Value()));
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Atan::Atan(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Atan::Atan(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Atan::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Atan accepts only 1 argument");
+    }
 }
 
 std::string Atan::Type() const
@@ -115,16 +103,14 @@ std::string Atan::Type() const
 
 std::variant<Matrix, std::complex<double>> Atan::Value() const
 {
-    return std::atan(std::get<std::complex<double>>(m_node_ptr->Value()));
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Sqrt::Sqrt(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Sqrt::Sqrt(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Sqrt::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Sqrt accepts only 1 argument");
+    }
 }
 
 std::string Sqrt::Type() const
@@ -134,16 +120,14 @@ std::string Sqrt::Type() const
 
 std::variant<Matrix, std::complex<double>> Sqrt::Value() const
 {
-    return std::sqrt(std::get<std::complex<double>>(m_node_ptr->Value()));
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Abs::Abs(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Abs::Abs(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Abs::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Abs accepts only 1 argument");
+    }
 }
 
 std::string Abs::Type() const
@@ -153,16 +137,14 @@ std::string Abs::Type() const
 
 std::variant<Matrix, std::complex<double>> Abs::Value() const
 {
-    return std::abs(std::get<std::complex<double>>(m_node_ptr->Value()));
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Exp::Exp(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Exp::Exp(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Exp::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Exp accepts only 1 argument");
+    }
 }
 
 std::string Exp::Type() const
@@ -172,16 +154,14 @@ std::string Exp::Type() const
 
 std::variant<Matrix, std::complex<double>> Exp::Value() const
 {
-    return std::exp(std::get<std::complex<double>>(m_node_ptr->Value()));
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Log::Log(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Log::Log(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Log::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Log accepts only 1 argument");
+    }
 }
 
 std::string Log::Type() const
@@ -191,5 +171,39 @@ std::string Log::Type() const
 
 std::variant<Matrix, std::complex<double>> Log::Value() const
 {
-    return std::log(std::get<std::complex<double>>(m_node_ptr->Value()));
+    return std::visit(Visitor{}, m_arguments[0]->Value());
+}
+
+Determinant::Determinant(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
+{
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Determinant accepts only 1 argument");
+    }
+}
+
+std::string Determinant::Type() const
+{
+    return "Determinant";
+}
+
+std::variant<Matrix, std::complex<double>> Determinant::Value() const
+{
+    return std::visit(Visitor{}, m_arguments[0]->Value());
+}
+
+Inverse::Inverse(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
+{
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Inverse accepts only 1 argument");
+    }
+}
+
+std::string Inverse::Type() const
+{
+    return "Inverse";
+}
+
+std::variant<Matrix, std::complex<double>> Inverse::Value() const
+{
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }

@@ -11,14 +11,19 @@
 #include <variant>
 
 #include "matrix.hpp"
+#include "utils.hpp"
 
 class Node
 {
 protected:
     std::variant<Matrix, std::complex<double>> m_value;
+    std::vector<std::shared_ptr<Node>> m_arguments;
 
 public:
     Node(std::variant<Matrix, std::complex<double>> const &value = 0.0);
+    Node(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+
+    std::shared_ptr<Node> Argument(size_t const &index) const;
 
     virtual std::string Type() const;
 

@@ -13,8 +13,6 @@
 
 class Affirmation : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
-
     struct Visitor
     {
         std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
@@ -29,9 +27,7 @@ class Affirmation : public Node
     };
 
 public:
-    Affirmation(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Affirmation(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -40,8 +36,6 @@ public:
 
 class Negation : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
-
     struct Visitor
     {
         std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
@@ -56,9 +50,7 @@ class Negation : public Node
     };
 
 public:
-    Negation(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Negation(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -67,9 +59,6 @@ public:
 
 class Exponentiation : public Node
 {
-    std::shared_ptr<Node> m_lhs_ptr;
-    std::shared_ptr<Node> m_rhs_ptr;
-
     struct Visitor
     {
         std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &lhs, std::complex<double> const &rhs)
@@ -89,15 +78,12 @@ class Exponentiation : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &lhs, std::complex<double> const &rhs)
         {
-            throw std::invalid_argument("Undefined operation: matrix ^ complex");
+            return lhs ^ static_cast<size_t>(rhs.real());
         }
     };
 
 public:
-    Exponentiation(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
-
-    std::shared_ptr<Node> LhsPtr() const;
-    std::shared_ptr<Node> RhsPtr() const;
+    Exponentiation(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -106,9 +92,6 @@ public:
 
 class Multiplication : public Node
 {
-    std::shared_ptr<Node> m_lhs_ptr;
-    std::shared_ptr<Node> m_rhs_ptr;
-
     struct Visitor
     {
         std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &lhs, std::complex<double> const &rhs)
@@ -133,10 +116,7 @@ class Multiplication : public Node
     };
 
 public:
-    Multiplication(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
-
-    std::shared_ptr<Node> LhsPtr() const;
-    std::shared_ptr<Node> RhsPtr() const;
+    Multiplication(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -145,9 +125,6 @@ public:
 
 class Division : public Node
 {
-    std::shared_ptr<Node> m_lhs_ptr;
-    std::shared_ptr<Node> m_rhs_ptr;
-
     struct Visitor
     {
         std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &lhs, std::complex<double> const &rhs)
@@ -172,10 +149,7 @@ class Division : public Node
     };
 
 public:
-    Division(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
-
-    std::shared_ptr<Node> LhsPtr() const;
-    std::shared_ptr<Node> RhsPtr() const;
+    Division(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -184,9 +158,6 @@ public:
 
 class Addition : public Node
 {
-    std::shared_ptr<Node> m_lhs_ptr;
-    std::shared_ptr<Node> m_rhs_ptr;
-
     struct Visitor
     {
         std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &lhs, std::complex<double> const &rhs)
@@ -211,10 +182,7 @@ class Addition : public Node
     };
 
 public:
-    Addition(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
-
-    std::shared_ptr<Node> LhsPtr() const;
-    std::shared_ptr<Node> RhsPtr() const;
+    Addition(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -223,9 +191,6 @@ public:
 
 class Subtraction : public Node
 {
-    std::shared_ptr<Node> m_lhs_ptr;
-    std::shared_ptr<Node> m_rhs_ptr;
-
     struct Visitor
     {
         std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &lhs, std::complex<double> const &rhs)
@@ -250,10 +215,7 @@ class Subtraction : public Node
     };
 
 public:
-    Subtraction(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
-
-    std::shared_ptr<Node> LhsPtr() const;
-    std::shared_ptr<Node> RhsPtr() const;
+    Subtraction(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 

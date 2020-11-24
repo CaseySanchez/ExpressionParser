@@ -1,4 +1,4 @@
 cmake_minimum_required(VERSION 3.1)
 
 add_subdirectory(MatrixExample)
-add_subdirectory(WavefunctionExample)
+add_subdirectory(GaussianExample)

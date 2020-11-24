@@ -42,6 +42,8 @@ private:
 
 class ExpressionParser
 {
+    static std::map<std::string, std::function<std::shared_ptr<Node>(std::shared_ptr<Node>)>> s_function_map;
+    
     std::string m_expression_str;
 
     std::map<std::string, std::shared_ptr<Node>> m_node_map;

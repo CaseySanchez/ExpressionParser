@@ -21,6 +21,8 @@ class Matrix
     std::vector<std::shared_ptr<Node>> m_elements;
     
 public:
+    static Matrix Identity(size_t const &dim);
+
     Matrix();
     Matrix(size_t const &rows, size_t const &cols);
     Matrix(size_t const &rows, size_t const &cols, std::vector<std::shared_ptr<Node>> const &elements);
@@ -37,6 +39,7 @@ public:
     Matrix operator-(std::complex<double> const &other) const;
     Matrix operator*(Matrix const &other) const;
     Matrix operator*(std::complex<double> const &other) const;
+    Matrix operator^(int32_t const &other) const;
 
     std::shared_ptr<Node> Minor(size_t const &row, size_t const &col) const;
     std::shared_ptr<Node> Determinant() const;

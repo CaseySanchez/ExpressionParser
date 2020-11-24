@@ -4,13 +4,11 @@
 
 #include "operations.hpp"
 
-Affirmation::Affirmation(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Affirmation::Affirmation(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Affirmation::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Affirmation accepts only 1 argument");
+    }
 }
 
 std::string Affirmation::Type() const
@@ -20,16 +18,14 @@ std::string Affirmation::Type() const
 
 std::variant<Matrix, std::complex<double>> Affirmation::Value() const
 {
-    return std::visit(Visitor{}, m_node_ptr->Value());
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Negation::Negation(std::shared_ptr<Node> const &node_ptr) : m_node_ptr(node_ptr)
+Negation::Negation(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Negation::NodePtr() const
-{
-    return m_node_ptr;
+    if (arguments.size() != 1) {
+        throw std::invalid_argument("Negation accepts only 1 argument");
+    }
 }
 
 std::string Negation::Type() const
@@ -39,21 +35,14 @@ std::string Negation::Type() const
 
 std::variant<Matrix, std::complex<double>> Negation::Value() const
 {
-    return std::visit(Visitor{}, m_node_ptr->Value());
+    return std::visit(Visitor{}, m_arguments[0]->Value());
 }
 
-Exponentiation::Exponentiation(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr) : m_lhs_ptr(lhs_ptr), m_rhs_ptr(rhs_ptr)
+Exponentiation::Exponentiation(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Exponentiation::LhsPtr() const
-{
-    return m_lhs_ptr;
-}
-
-std::shared_ptr<Node> Exponentiation::RhsPtr() const
-{
-    return m_rhs_ptr;
+    if (arguments.size() != 2) {
+        throw std::invalid_argument("Exponentiation accepts only 2 arguments");
+    }
 }
 
 std::string Exponentiation::Type() const
@@ -63,21 +52,14 @@ std::string Exponentiation::Type() const
 
 std::variant<Matrix, std::complex<double>> Exponentiation::Value() const
 {
-    return std::visit(Visitor{}, m_lhs_ptr->Value(), m_rhs_ptr->Value());
+    return std::visit(Visitor{}, m_arguments[0]->Value(), m_arguments[1]->Value());
 }
 
-Multiplication::Multiplication(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr) : m_lhs_ptr(lhs_ptr), m_rhs_ptr(rhs_ptr)
+Multiplication::Multiplication(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Multiplication::LhsPtr() const
-{
-    return m_lhs_ptr;
-}
-
-std::shared_ptr<Node> Multiplication::RhsPtr() const
-{
-    return m_rhs_ptr;
+    if (arguments.size() != 2) {
+        throw std::invalid_argument("Multiplication accepts only 2 arguments");
+    }
 }
 
 std::string Multiplication::Type() const
@@ -87,21 +69,14 @@ std::string Multiplication::Type() const
 
 std::variant<Matrix, std::complex<double>> Multiplication::Value() const
 {
-    return std::visit(Visitor{}, m_lhs_ptr->Value(), m_rhs_ptr->Value());
+    return std::visit(Visitor{}, m_arguments[0]->Value(), m_arguments[1]->Value());
 }
 
-Division::Division(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr) : m_lhs_ptr(lhs_ptr), m_rhs_ptr(rhs_ptr)
+Division::Division(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Division::LhsPtr() const
-{
-    return m_lhs_ptr;
-}
-
-std::shared_ptr<Node> Division::RhsPtr() const
-{
-    return m_rhs_ptr;
+    if (arguments.size() != 2) {
+        throw std::invalid_argument("Division accepts only 2 arguments");
+    }
 }
 
 std::string Division::Type() const
@@ -111,21 +86,14 @@ std::string Division::Type() const
 
 std::variant<Matrix, std::complex<double>> Division::Value() const
 {
-    return std::visit(Visitor{}, m_lhs_ptr->Value(), m_rhs_ptr->Value());
+    return std::visit(Visitor{}, m_arguments[0]->Value(), m_arguments[1]->Value());
 }
 
-Addition::Addition(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr) : m_lhs_ptr(lhs_ptr), m_rhs_ptr(rhs_ptr)
+Addition::Addition(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Addition::LhsPtr() const
-{
-    return m_lhs_ptr;
-}
-
-std::shared_ptr<Node> Addition::RhsPtr() const
-{
-    return m_rhs_ptr;
+    if (arguments.size() != 2) {
+        throw std::invalid_argument("Addition accepts only 2 arguments");
+    }
 }
 
 std::string Addition::Type() const
@@ -135,21 +103,14 @@ std::string Addition::Type() const
 
 std::variant<Matrix, std::complex<double>> Addition::Value() const
 {
-    return std::visit(Visitor{}, m_lhs_ptr->Value(), m_rhs_ptr->Value());
+    return std::visit(Visitor{}, m_arguments[0]->Value(), m_arguments[1]->Value());
 }
 
-Subtraction::Subtraction(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr) : m_lhs_ptr(lhs_ptr), m_rhs_ptr(rhs_ptr)
+Subtraction::Subtraction(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
-}
-
-std::shared_ptr<Node> Subtraction::LhsPtr() const
-{
-    return m_lhs_ptr;
-}
-
-std::shared_ptr<Node> Subtraction::RhsPtr() const
-{
-    return m_rhs_ptr;
+    if (arguments.size() != 2) {
+        throw std::invalid_argument("Subtraction accepts only 2 arguments");
+    }
 }
 
 std::string Subtraction::Type() const
@@ -159,5 +120,5 @@ std::string Subtraction::Type() const
 
 std::variant<Matrix, std::complex<double>> Subtraction::Value() const
 {
-    return std::visit(Visitor{}, m_lhs_ptr->Value(), m_rhs_ptr->Value());
+    return std::visit(Visitor{}, m_arguments[0]->Value(), m_arguments[1]->Value());
 }

@@ -12,12 +12,21 @@
 
 class Cos : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return std::cos(value);
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            throw std::invalid_argument("Undefined function: Cos(matrix)");
+        }
+    };
 
 public:
-    Cos(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Cos(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -26,12 +35,21 @@ public:
 
 class Sin : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return std::sin(value);
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            throw std::invalid_argument("Undefined function: Sin(matrix)");
+        }
+    };
 
 public:
-    Sin(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Sin(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -40,12 +58,21 @@ public:
 
 class Tan : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return std::tan(value);
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            throw std::invalid_argument("Undefined function: Tan(matrix)");
+        }
+    };
 
 public:
-    Tan(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Tan(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -54,12 +81,21 @@ public:
 
 class Acos : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return std::acos(value);
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            throw std::invalid_argument("Undefined function: Acos(matrix)");
+        }
+    };
 
 public:
-    Acos(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Acos(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -68,12 +104,21 @@ public:
 
 class Asin : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return std::asin(value);
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            throw std::invalid_argument("Undefined function: Asin(matrix)");
+        }
+    };
 
 public:
-    Asin(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Asin(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -82,12 +127,21 @@ public:
 
 class Atan : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return std::atan(value);
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            throw std::invalid_argument("Undefined function: Atan(matrix)");
+        }
+    };
 
 public:
-    Atan(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Atan(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -96,12 +150,21 @@ public:
 
 class Sqrt : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return std::sqrt(value);
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            throw std::invalid_argument("Undefined function: Sqrt(matrix)");
+        }
+    };
 
 public:
-    Sqrt(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Sqrt(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -110,12 +173,21 @@ public:
 
 class Abs : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return std::abs(value);
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            throw std::invalid_argument("Undefined function: Abs(matrix)");
+        }
+    };
 
 public:
-    Abs(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Abs(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -124,12 +196,21 @@ public:
 
 class Exp : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return std::exp(value);
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            throw std::invalid_argument("Undefined function: Exp(matrix)");
+        }
+    };
 
 public:
-    Exp(std::shared_ptr<Node> const &node_ptr);
-
-    std::shared_ptr<Node> NodePtr() const;
+    Exp(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -138,12 +219,69 @@ public:
 
 class Log : public Node
 {
-    std::shared_ptr<Node> m_node_ptr;
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return std::log(value);
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            throw std::invalid_argument("Undefined function: Log(matrix)");
+        }
+    };
 
 public:
-    Log(std::shared_ptr<Node> const &node_ptr);
+    Log(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
-    std::shared_ptr<Node> NodePtr() const;
+    std::string Type() const override;
+
+    std::variant<Matrix, std::complex<double>> Value() const override;
+};
+
+class Determinant : public Node
+{
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            throw std::invalid_argument("Undefined function: det complex");
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            std::shared_ptr<Node> determinant_ptr = value.Determinant();
+
+            return determinant_ptr->Value();
+        }
+    };
+
+public:
+    Determinant(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+
+    std::string Type() const override;
+
+    std::variant<Matrix, std::complex<double>> Value() const override;
+};
+
+class Inverse : public Node
+{
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return 1.0 / value;
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            return value.Inverse();
+        }
+    };
+
+public:
+    Inverse(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
