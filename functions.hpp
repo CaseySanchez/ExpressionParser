@@ -21,7 +21,15 @@ class Cos : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
         {
-            throw std::invalid_argument("Undefined function: Cos(matrix)");
+            Matrix matrix(value.Rows(), value.Cols());
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    matrix(i, j) = std::shared_ptr<Cos>(new Cos({ value(i, j) }));
+                }
+            }
+
+            return matrix;
         }
     };
 
@@ -44,7 +52,15 @@ class Sin : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
         {
-            throw std::invalid_argument("Undefined function: Sin(matrix)");
+            Matrix matrix(value.Rows(), value.Cols());
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    matrix(i, j) = std::shared_ptr<Sin>(new Sin({ value(i, j) }));
+                }
+            }
+
+            return matrix;
         }
     };
 
@@ -67,7 +83,15 @@ class Tan : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
         {
-            throw std::invalid_argument("Undefined function: Tan(matrix)");
+            Matrix matrix(value.Rows(), value.Cols());
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    matrix(i, j) = std::shared_ptr<Tan>(new Tan({ value(i, j) }));
+                }
+            }
+
+            return matrix;
         }
     };
 
@@ -90,7 +114,15 @@ class Acos : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
         {
-            throw std::invalid_argument("Undefined function: Acos(matrix)");
+            Matrix matrix(value.Rows(), value.Cols());
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    matrix(i, j) = std::shared_ptr<Acos>(new Acos({ value(i, j) }));
+                }
+            }
+
+            return matrix;
         }
     };
 
@@ -113,7 +145,15 @@ class Asin : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
         {
-            throw std::invalid_argument("Undefined function: Asin(matrix)");
+            Matrix matrix(value.Rows(), value.Cols());
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    matrix(i, j) = std::shared_ptr<Asin>(new Asin({ value(i, j) }));
+                }
+            }
+
+            return matrix;
         }
     };
 
@@ -136,7 +176,15 @@ class Atan : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
         {
-            throw std::invalid_argument("Undefined function: Atan(matrix)");
+            Matrix matrix(value.Rows(), value.Cols());
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    matrix(i, j) = std::shared_ptr<Atan>(new Atan({ value(i, j) }));
+                }
+            }
+
+            return matrix;
         }
     };
 
@@ -159,7 +207,15 @@ class Sqrt : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
         {
-            throw std::invalid_argument("Undefined function: Sqrt(matrix)");
+            Matrix matrix(value.Rows(), value.Cols());
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    matrix(i, j) = std::shared_ptr<Sqrt>(new Sqrt({ value(i, j) }));
+                }
+            }
+
+            return matrix;
         }
     };
 
@@ -182,7 +238,15 @@ class Abs : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
         {
-            throw std::invalid_argument("Undefined function: Abs(matrix)");
+            Matrix matrix(value.Rows(), value.Cols());
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    matrix(i, j) = std::shared_ptr<Abs>(new Abs({ value(i, j) }));
+                }
+            }
+
+            return matrix;
         }
     };
 
@@ -205,7 +269,15 @@ class Exp : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
         {
-            throw std::invalid_argument("Undefined function: Exp(matrix)");
+            Matrix matrix(value.Rows(), value.Cols());
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    matrix(i, j) = std::shared_ptr<Exp>(new Exp({ value(i, j) }));
+                }
+            }
+
+            return matrix;
         }
     };
 
@@ -228,7 +300,15 @@ class Log : public Node
 
         std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
         {
-            throw std::invalid_argument("Undefined function: Log(matrix)");
+            Matrix matrix(value.Rows(), value.Cols());
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    matrix(i, j) = std::shared_ptr<Log>(new Log({ value(i, j) }));
+                }
+            }
+
+            return matrix;
         }
     };
 

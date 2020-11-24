@@ -17,6 +17,11 @@ std::shared_ptr<Node> Node::Argument(size_t const &index) const
     return m_arguments.at(index);
 }
 
+std::vector<std::shared_ptr<Node>> Node::Arguments() const
+{
+    return m_arguments;
+}
+
 std::string Node::Type() const
 {
     return "Node";
@@ -25,6 +30,20 @@ std::string Node::Type() const
 std::variant<Matrix, std::complex<double>> Node::Value() const
 {
     return m_value;
+}
+
+void Node::Visualize()
+{
+    Visualize(0);
+}
+
+void Node::Visualize(size_t const &depth)
+{        
+    std::cout << std::string(depth * 4, ' ') << "[" << Type() << "] " << *this << std::endl;
+
+    for (auto const &argument_ptr : Arguments()) {
+        argument_ptr->Visualize(depth + 1);
+    }
 }
 
 std::ostream &operator<<(std::ostream &ostream, Node const &node)

@@ -4,10 +4,12 @@
 
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <complex>
 #include <memory>
 #include <vector>
+#include <map>
 #include <variant>
 
 #include "matrix.hpp"
@@ -24,11 +26,18 @@ public:
     Node(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::shared_ptr<Node> Argument(size_t const &index) const;
+    std::vector<std::shared_ptr<Node>> Arguments() const;
 
     virtual std::string Type() const;
 
     virtual std::variant<Matrix, std::complex<double>> Value() const;
 
+    void Visualize();
+
+private:
+    void Visualize(size_t const &depth);
+
+public:
     friend std::ostream &operator<<(std::ostream &ostream, Node const &node);
     friend std::ostream &operator<<(std::ostream &ostream, std::shared_ptr<Node> const &node_ptr);
 };

@@ -230,7 +230,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Simplify(std::shared_ptr<Node> const
 std::shared_ptr<Node> ExpressionSimplifier::Distribute(std::shared_ptr<Node> const &node_ptr)
 {
     std::vector<std::shared_ptr<Node>> factors = Factors(node_ptr);
-    
+
     if (factors.size() > 0) {
         std::shared_ptr<Node> distributed;
 
@@ -238,7 +238,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Distribute(std::shared_ptr<Node> con
 
         factors.pop_back();
 
-        while (factors.size() > 1) {
+        while (factors.size() > 0) {
             std::vector<std::shared_ptr<Node>> lhs_summands = Summands(factors.back());
 
             factors.pop_back();
@@ -281,10 +281,8 @@ std::vector<std::shared_ptr<Node>> ExpressionSimplifier::Factors(std::shared_ptr
 void ExpressionSimplifier::Factors(std::vector<std::shared_ptr<Node>> &factors, std::shared_ptr<Node> const &node_ptr)
 {
     if (node_ptr->Type() == "Multiplication") {
-        std::shared_ptr<Multiplication> multiplication_ptr = std::dynamic_pointer_cast<Multiplication>(node_ptr);
-
-        std::shared_ptr<Node> lhs_arg_ptr = multiplication_ptr->Argument(0);
-        std::shared_ptr<Node> rhs_arg_ptr = multiplication_ptr->Argument(1);
+        std::shared_ptr<Node> lhs_arg_ptr = node_ptr->Argument(0);
+        std::shared_ptr<Node> rhs_arg_ptr = node_ptr->Argument(1);
 
         if (lhs_arg_ptr->Type() != "Multiplication") {
             factors.emplace_back(lhs_arg_ptr);
@@ -311,23 +309,21 @@ std::vector<std::shared_ptr<Node>> ExpressionSimplifier::Summands(std::shared_pt
 void ExpressionSimplifier::Summands(std::vector<std::shared_ptr<Node>> &summands, std::shared_ptr<Node> const &node_ptr)
 {
     if (node_ptr->Type() == "Addition") {
-        std::shared_ptr<Addition> addition_ptr = std::dynamic_pointer_cast<Addition>(node_ptr);
+        std::shared_ptr<Node> lhs_arg_ptr = node_ptr->Argument(0);
+        std::shared_ptr<Node> rhs_arg_ptr = node_ptr->Argument(1);
 
-        std::shared_ptr<Node> lhs_arg_ptr = addition_ptr->Argument(0);
-        std::shared_ptr<Node> rhs_arg_ptr = addition_ptr->Argument(1);
-
-        if (lhs_arg_ptr->Type() != "Addition" && lhs_arg_ptr->Type() != "Subtraction") {
+        if (lhs_arg_ptr->Type() != "Addition") {// && lhs_arg_ptr->Type() != "Subtraction") {
             summands.emplace_back(lhs_arg_ptr);
         }
 
-        if (rhs_arg_ptr->Type() != "Addition" && rhs_arg_ptr->Type() != "Subtraction") {
+        if (rhs_arg_ptr->Type() != "Addition") {// && rhs_arg_ptr->Type() != "Subtraction") {
             summands.emplace_back(rhs_arg_ptr);
         }
 
         Summands(summands, lhs_arg_ptr);
         Summands(summands, rhs_arg_ptr);
     }
-    else if (node_ptr->Type() == "Subtraction") {
+    /*else if (node_ptr->Type() == "Subtraction") {
         std::shared_ptr<Subtraction> subtraction_ptr = std::dynamic_pointer_cast<Subtraction>(node_ptr);
 
         std::shared_ptr<Node> lhs_arg_ptr = subtraction_ptr->Argument(0);
@@ -343,5 +339,5 @@ void ExpressionSimplifier::Summands(std::vector<std::shared_ptr<Node>> &summands
 
         Summands(summands, lhs_arg_ptr);
         Summands(summands, rhs_arg_ptr);
-    }
+    }*/
 }

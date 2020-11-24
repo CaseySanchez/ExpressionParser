@@ -23,6 +23,7 @@ public:
     std::shared_ptr<Node> Simplify();
 
     std::shared_ptr<Node> Distribute(std::shared_ptr<Node> const &node_ptr);
+    std::shared_ptr<Node> Factor(std::shared_ptr<Node> const &node_ptr);
 
     std::vector<std::shared_ptr<Node>> Factors(std::shared_ptr<Node> const &node_ptr);
     std::vector<std::shared_ptr<Node>> Summands(std::shared_ptr<Node> const &node_ptr);
