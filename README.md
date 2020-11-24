@@ -10,10 +10,14 @@ Expression Parser is an algebraic expression parser. The parser takes an input s
 ### Building
 Built on Ubuntu 20.04.1 LTS compiled with GCC 9.3.0.
 
-To build and run "AWSExpressionParser", "Examples", and "Tests":
+To build "AWSExpressionParser", "Examples", and "Tests":
 ```
 mkdir build && cd build
 cmake -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON .. && make
+```
+
+To run the examples:
+```
 cd Examples/MatrixExample && ./MatrixExample
 cd Examples/GaussianExample && ./GaussianExample
 ```
