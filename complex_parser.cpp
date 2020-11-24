@@ -1,3 +1,7 @@
+/*
+ * Copyright 2020 Casey Sanchez
+ */
+
 #include "complex_parser.hpp"
 
 ComplexParser::ComplexParser(std::string const &complex_str) : m_complex_str(complex_str)
