@@ -34,10 +34,8 @@ int main(int argc, char *argv[])
             }
         }
 
-        ExpressionComposer expression_composer(psi, node_map);
-
         std::cout << "Re-composed expression from expression tree: " << std::endl;
-        std::cout << expression_composer.Compose() << std::endl;
+        std::cout << ExpressionComposer(psi, node_map) << std::endl;
     }
     catch(std::exception const &exception) {
         std::cout << exception.what() << std::endl;

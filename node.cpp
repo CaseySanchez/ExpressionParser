@@ -12,12 +12,12 @@ Node::Node(std::initializer_list<std::shared_ptr<Node>> const &arguments) : m_ar
 {
 }
 
-std::shared_ptr<Node> Node::Argument(size_t const &index) const
+std::shared_ptr<Node> &Node::Argument(size_t const &index)
 {
     return m_arguments.at(index);
 }
 
-std::vector<std::shared_ptr<Node>> Node::Arguments() const
+std::vector<std::shared_ptr<Node>> &Node::Arguments()
 {
     return m_arguments;
 }
@@ -32,20 +32,6 @@ std::variant<Matrix, std::complex<double>> Node::Value() const
     return m_value;
 }
 
-void Node::Visualize()
-{
-    Visualize(0);
-}
-
-void Node::Visualize(size_t const &depth)
-{        
-    std::cout << std::string(depth * 4, ' ') << "[" << Type() << "] " << *this << std::endl;
-
-    for (auto const &argument_ptr : Arguments()) {
-        argument_ptr->Visualize(depth + 1);
-    }
-}
-
 std::ostream &operator<<(std::ostream &ostream, Node const &node)
 {
     auto value = node.Value();
@@ -54,13 +40,16 @@ std::ostream &operator<<(std::ostream &ostream, Node const &node)
         std::complex<double> complex = std::get<std::complex<double>>(value);
 
         if (!Approximately(complex.real(), 0.0) && !Approximately(complex.imag(), 0.0)) {
-            ostream << std::to_string(complex.real()) << (complex.imag() > 0.0 ? "+" : "") << std::to_string(complex.imag()) << "i";
+            ostream << complex.real() << (complex.imag() > 0.0 ? "+" : "") << complex.imag() << "i";
         }
         else if(!Approximately(complex.real(), 0.0)) {
-            ostream << std::to_string(complex.real());
+            ostream << complex.real();
         }
         else if(!Approximately(complex.imag(), 0.0)) {
-            ostream << std::to_string(complex.imag()) << "i";
+            ostream << complex.imag() << "i";
+        }
+        else {
+            ostream << 0.0;
         }
     }
     else if (std::holds_alternative<Matrix>(value)) {

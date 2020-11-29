@@ -181,7 +181,7 @@ std::shared_ptr<Node> ExpressionParser::Brackets(std::string const &expression_s
         if ((bracket_match[2].str() == "(" && bracket_match[4].str() == ")") || 
             (bracket_match[2].str() == "[" && bracket_match[4].str() == "]") || 
             (bracket_match[2].str() == "{" && bracket_match[4].str() == "}")) {
-            std::shared_ptr<Node> expression_ptr = Operations(bracket_match[3].str());
+            std::shared_ptr<Node> expression_ptr = Operators(bracket_match[3].str());
 
             if (std::regex_search(bracket_match[1].first, bracket_match[1].second, function_match, function_regex)) {
                 std::string function_text;
@@ -230,10 +230,10 @@ std::shared_ptr<Node> ExpressionParser::Brackets(std::string const &expression_s
         }
     }
     
-    return Operations(expression_str);
+    return Operators(expression_str);
 }
 
-std::shared_ptr<Node> ExpressionParser::Operations(std::string const &expression_str)
+std::shared_ptr<Node> ExpressionParser::Operators(std::string const &expression_str)
 {
     std::regex operator_regex("^(.*[^\\+\\-\\*\\/\\^])([\\+\\-])(.*)$|^(.*[^\\+\\-\\*\\/\\^])([\\*\\/])(.*)$|^(.*?[^\\+\\-\\*\\/\\^])([\\^])(.*)$|^([\\+\\-])(.*)$");
     
@@ -241,44 +241,44 @@ std::shared_ptr<Node> ExpressionParser::Operations(std::string const &expression
 
     if (std::regex_search(std::cbegin(expression_str), std::cend(expression_str), operator_match, operator_regex)) {
         if (operator_match[2].str() == "+") {
-            std::shared_ptr<Node> lhs_arg_ptr = Operations(operator_match[1].str());
-            std::shared_ptr<Node> rhs_arg_ptr = Operations(operator_match[3].str());
+            std::shared_ptr<Node> lhs_arg_ptr = Operators(operator_match[1].str());
+            std::shared_ptr<Node> rhs_arg_ptr = Operators(operator_match[3].str());
 
             return std::shared_ptr<Addition>(new Addition({ lhs_arg_ptr, rhs_arg_ptr }));
         }
         else if (operator_match[2].str() == "-") {
-            std::shared_ptr<Node> lhs_arg_ptr = Operations(operator_match[1].str());
-            std::shared_ptr<Node> rhs_arg_ptr = Operations(operator_match[3].str());
+            std::shared_ptr<Node> lhs_arg_ptr = Operators(operator_match[1].str());
+            std::shared_ptr<Node> rhs_arg_ptr = Operators(operator_match[3].str());
 
             return std::shared_ptr<Subtraction>(new Subtraction({ lhs_arg_ptr, rhs_arg_ptr }));
         }
         else if (operator_match[5].str() == "*") {
-            std::shared_ptr<Node> lhs_arg_ptr = Operations(operator_match[4].str());
-            std::shared_ptr<Node> rhs_arg_ptr = Operations(operator_match[6].str());
+            std::shared_ptr<Node> lhs_arg_ptr = Operators(operator_match[4].str());
+            std::shared_ptr<Node> rhs_arg_ptr = Operators(operator_match[6].str());
 
             return std::shared_ptr<Multiplication>(new Multiplication({ lhs_arg_ptr, rhs_arg_ptr }));
         }
         else if (operator_match[5].str() == "/") {
-            std::shared_ptr<Node> lhs_arg_ptr = Operations(operator_match[4].str());
-            std::shared_ptr<Node> rhs_arg_ptr = Operations(operator_match[6].str());
+            std::shared_ptr<Node> lhs_arg_ptr = Operators(operator_match[4].str());
+            std::shared_ptr<Node> rhs_arg_ptr = Operators(operator_match[6].str());
 
             return std::shared_ptr<Division>(new Division({ lhs_arg_ptr, rhs_arg_ptr }));
         }
         else if (operator_match[8].str() == "^") {
-            std::shared_ptr<Node> lhs_arg_ptr = Operations(operator_match[7].str());
-            std::shared_ptr<Node> rhs_arg_ptr = Operations(operator_match[9].str());
+            std::shared_ptr<Node> lhs_arg_ptr = Operators(operator_match[7].str());
+            std::shared_ptr<Node> rhs_arg_ptr = Operators(operator_match[9].str());
 
             return std::shared_ptr<Exponentiation>(new Exponentiation({ lhs_arg_ptr, rhs_arg_ptr }));
         }
         else if (operator_match[10].str() == "+") {
-            std::shared_ptr<Node> arg_ptr = Operations(operator_match[11].str());
+            std::shared_ptr<Node> arg_ptr = Operators(operator_match[11].str());
 
-            return std::shared_ptr<Affirmation>(new Affirmation({ arg_ptr }));
+            return std::shared_ptr<Multiplication>(new Multiplication({ std::shared_ptr<Constant>(new Constant(1.0)), arg_ptr }));
         }
         else if (operator_match[10].str() == "-") {
-            std::shared_ptr<Node> arg_ptr = Operations(operator_match[11].str());
+            std::shared_ptr<Node> arg_ptr = Operators(operator_match[11].str());
 
-            return std::shared_ptr<Negation>(new Negation({ arg_ptr }));
+            return std::shared_ptr<Multiplication>(new Multiplication({ std::shared_ptr<Constant>(new Constant(-1.0)), arg_ptr }));
         } 
     }
 

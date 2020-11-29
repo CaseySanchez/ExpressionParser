@@ -7,7 +7,7 @@ option(BUILD_TESTS "Build the provided unit tests")
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(ExpressionParser SHARED node.cpp operations.cpp functions.cpp matrix.cpp expression_parser.cpp expression_composer.cpp expression_simplifier.cpp equation_parser.cpp complex_parser.cpp utils.cpp)
+add_library(ExpressionParser SHARED node.cpp operations.cpp functions.cpp matrix.cpp expression_parser.cpp expression_composer.cpp expression_simplifier.cpp equation_parser.cpp complex_parser.cpp expression_visualizer.cpp utils.cpp)
 
 set_property(TARGET ExpressionParser PROPERTY CXX_STANDARD 17)
 

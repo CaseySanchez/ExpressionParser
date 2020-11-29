@@ -4,40 +4,6 @@
 
 #include "operations.hpp"
 
-Affirmation::Affirmation(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
-{
-    if (arguments.size() != 1) {
-        throw std::invalid_argument("Affirmation accepts only 1 argument");
-    }
-}
-
-std::string Affirmation::Type() const
-{
-    return "Affirmation";
-}
-
-std::variant<Matrix, std::complex<double>> Affirmation::Value() const
-{
-    return std::visit(Visitor{}, m_arguments[0]->Value());
-}
-
-Negation::Negation(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
-{
-    if (arguments.size() != 1) {
-        throw std::invalid_argument("Negation accepts only 1 argument");
-    }
-}
-
-std::string Negation::Type() const
-{
-    return "Negation";
-}
-
-std::variant<Matrix, std::complex<double>> Negation::Value() const
-{
-    return std::visit(Visitor{}, m_arguments[0]->Value());
-}
-
 Exponentiation::Exponentiation(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
     if (arguments.size() != 2) {

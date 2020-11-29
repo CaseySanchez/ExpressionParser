@@ -11,11 +11,13 @@
 #include <vector>
 #include <map>
 #include <variant>
+#include <algorithm>
+#include <numeric>
 
 #include "matrix.hpp"
 #include "utils.hpp"
 
-class Node
+class Node : protected std::enable_shared_from_this<Node>
 {
 protected:
     std::variant<Matrix, std::complex<double>> m_value;
@@ -25,17 +27,12 @@ public:
     Node(std::variant<Matrix, std::complex<double>> const &value = 0.0);
     Node(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
-    std::shared_ptr<Node> Argument(size_t const &index) const;
-    std::vector<std::shared_ptr<Node>> Arguments() const;
+    std::shared_ptr<Node> &Argument(size_t const &index);
+    std::vector<std::shared_ptr<Node>> &Arguments();
 
     virtual std::string Type() const;
 
     virtual std::variant<Matrix, std::complex<double>> Value() const;
-
-    void Visualize();
-
-private:
-    void Visualize(size_t const &depth);
 
 public:
     friend std::ostream &operator<<(std::ostream &ostream, Node const &node);

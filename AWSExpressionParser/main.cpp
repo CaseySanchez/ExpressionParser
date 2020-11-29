@@ -1,5 +1,3 @@
-// Transforms a 2D vector by a 2D rotation matrix
-
 #include <iostream> 
 #include <sstream>
 
@@ -17,8 +15,6 @@
 
 aws::lambda_runtime::invocation_response handler(aws::lambda_runtime::invocation_request const &request)
 {
-    //return aws::lambda_runtime::invocation_response("succ", "text/plain", true);
-
     try {
         nlohmann::json json = nlohmann::json::parse(request.payload);
 

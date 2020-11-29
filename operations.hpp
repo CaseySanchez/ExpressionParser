@@ -11,52 +11,6 @@
 #include "node.hpp"
 #include "matrix.hpp"
 
-class Affirmation : public Node
-{
-    struct Visitor
-    {
-        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
-        {
-            return value * +1.0;
-        }
-
-        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
-        {
-            return value * +1.0;
-        }
-    };
-
-public:
-    Affirmation(std::initializer_list<std::shared_ptr<Node>> const &arguments);
-
-    std::string Type() const override;
-
-    std::variant<Matrix, std::complex<double>> Value() const override;
-};
-
-class Negation : public Node
-{
-    struct Visitor
-    {
-        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
-        {
-            return value * -1.0;
-        }
-
-        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
-        {
-            return value * -1.0;
-        }
-    };
-
-public:
-    Negation(std::initializer_list<std::shared_ptr<Node>> const &arguments);
-
-    std::string Type() const override;
-
-    std::variant<Matrix, std::complex<double>> Value() const override;
-};
-
 class Exponentiation : public Node
 {
     struct Visitor
