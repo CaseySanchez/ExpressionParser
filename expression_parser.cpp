@@ -288,7 +288,9 @@ std::shared_ptr<Node> ExpressionParser::Operators(std::string const &expression_
 std::shared_ptr<Node> ExpressionParser::Nodes(std::string const &node_str)
 {
     try {
-        double value = std::stod(node_str);
+        ComplexParser complex_parser(node_str);
+
+        std::complex<double> value = complex_parser.Parse();
 
         std::string constant_name = m_parser_context->NextConstantName();
         

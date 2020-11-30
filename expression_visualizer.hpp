@@ -14,6 +14,8 @@ class ExpressionVisualizer
 public:
     ExpressionVisualizer(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map);
 
+    std::string Visualize() const;
+    
     void Visualize(std::ostream &ostream) const;
 
 private:

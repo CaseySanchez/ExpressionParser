@@ -8,6 +8,15 @@ ExpressionComposer::ExpressionComposer(std::shared_ptr<Node> const &node_ptr, st
 {
 }
 
+std::string ExpressionComposer::Compose() const
+{
+    std::ostringstream ostringstream;
+
+    Compose(ostringstream);
+
+    return ostringstream.str();
+}
+
 void ExpressionComposer::Compose(std::ostream &ostream) const
 {
     Compose(ostream, m_node_ptr);
@@ -45,15 +54,10 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
             });
 
         if (node_it != std::cend(m_node_map)) {
-            if (precedence < 1) {
-                ostream << "\\left(" << node_it->first << "\\right)";
-            }
-            else {
-                ostream << node_it->first;
-            }
+            ostream << node_it->first;
         }
         else {
-            ostream << "\\left(" << node_ptr << "i\\right)";
+            ostream << node_ptr;
         }
     }
     else if (node_ptr->Type() == "Constant") {
@@ -63,15 +67,10 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
             });
 
         if (node_it != std::cend(m_node_map)) {
-            if (precedence < 1) {
-                ostream << "\\left(" << node_it->first << "\\right)";
-            }
-            else {
-                ostream << node_it->first;
-            }
+            ostream << node_it->first;
         }
         else {
-            ostream << "\\left(" << node_ptr << "\\right)";
+            ostream << node_ptr;
         }
     }
     else if (node_ptr->Type() == "Exponentiation") {

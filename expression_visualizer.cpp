@@ -8,6 +8,15 @@ ExpressionVisualizer::ExpressionVisualizer(std::shared_ptr<Node> const &node_ptr
 {
 }
 
+std::string ExpressionVisualizer::Visualize() const
+{
+    std::ostringstream ostringstream;
+
+    Visualize(ostringstream);
+
+    return ostringstream.str();
+}
+
 void ExpressionVisualizer::Visualize(std::ostream &ostream) const
 {
     Visualize(ostream, m_node_ptr, 0);

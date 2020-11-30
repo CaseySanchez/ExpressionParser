@@ -18,6 +18,7 @@
 #include "functions.hpp"
 #include "utils.hpp"
 #include "matrix.hpp"
+#include "complex_parser.hpp"
 
 class ExpressionParserContext
 {

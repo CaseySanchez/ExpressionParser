@@ -23,6 +23,8 @@ class ExpressionComposer
 public:
     ExpressionComposer(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map = { });
 
+    std::string Compose() const;
+
     void Compose(std::ostream &ostream) const;
 
 private:
