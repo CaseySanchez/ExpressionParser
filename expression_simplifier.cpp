@@ -220,14 +220,18 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
         std::vector<std::shared_ptr<Node>> coefficients;
         std::vector<std::shared_ptr<Node>> variables;
 
+        // Separate the factors into their coefficients and their variables
         std::partition_copy(std::cbegin(factors), std::cend(factors), std::back_inserter(coefficients), std::back_inserter(variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "Constant"; });
 
         if (!variables.empty()) {
+            // Assess factors with O(n*(n-1)/2) complexity
             for (auto lhs_variable_it = std::begin(variables); lhs_variable_it != std::end(variables); ++lhs_variable_it) {
                 for (auto rhs_variable_it = std::next(lhs_variable_it); rhs_variable_it != std::end(variables); ++rhs_variable_it) {
                     std::shared_ptr<Node> lhs_variable;
                     std::shared_ptr<Node> rhs_variable;
                     
+                    // Extract the variable of interest; 
+                    // if the node is of type "Exponentiation" we want Argument(0) 
                     if ((*lhs_variable_it)->Type() == "Exponentiation") {
                         lhs_variable = (*lhs_variable_it)->Argument(0);
                     }
@@ -242,10 +246,13 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
                         rhs_variable = (*rhs_variable_it);
                     }
 
+                    // If the variables are the same sum their degrees
                     if (lhs_variable == rhs_variable) {
                         std::shared_ptr<Node> lhs_degree;
                         std::shared_ptr<Node> rhs_degree;
                         
+                        // If the variable is of type "Exponentiation" then our degree is Argument(1)
+                        // otherwise we have an implied degree of 1
                         if ((*lhs_variable_it)->Type() == "Exponentiation") {
                             lhs_degree = (*lhs_variable_it)->Argument(1);
                         }
@@ -260,8 +267,10 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
                             rhs_degree = std::shared_ptr<Constant>(new Constant(1.0));
                         }
 
+                        // Add their degrees and exponentiate
                         *lhs_variable_it = std::shared_ptr<Exponentiation>(new Exponentiation({ lhs_variable, std::shared_ptr<Addition>(new Addition({ lhs_degree, rhs_degree })) }));
 
+                        // Remove the old variable
                         rhs_variable_it = variables.erase(rhs_variable_it);
 
                         if (rhs_variable_it == std::end(variables)) {
@@ -271,8 +280,10 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
                 }
             }
 
+            // Reduce the factors to a single combined node via repeated Multiplication nodes
             std::shared_ptr<Node> combined_factors = std::reduce(std::next(std::cbegin(variables)), std::cend(variables), variables.front(), [](std::shared_ptr<Node> const &combined_factors, std::shared_ptr<Node> const &combined_factor) { return std::shared_ptr<Multiplication>(new Multiplication({ combined_factors, combined_factor })); });
             
+            // Reduce the coefficients to a single value via repeated multiplication
             if (!coefficients.empty()) {
                 std::complex<double> coefficient = std::transform_reduce(std::cbegin(coefficients), std::cend(coefficients), std::complex<double>(1.0, 0.0), [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { return product_coefficient * coefficient; }, [](std::shared_ptr<Node> const &coefficient) -> std::complex<double> { return std::get<std::complex<double>>(coefficient->Value()); });
 
@@ -301,11 +312,14 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
     std::vector<std::shared_ptr<Node>> addends = Addends(node_ptr);
 
     if (addends.size() > 0) {
+        // Assess addends with O(n*(n-1)/2) complexity
         for (auto addend_lhs_it = std::begin(addends); addend_lhs_it != std::end(addends); ++addend_lhs_it) {
             for (auto addend_rhs_it = std::next(addend_lhs_it); addend_rhs_it != std::end(addends); ++addend_rhs_it) {                
+                // Extract the factors from the lhs addend and the rhs addend                
                 auto lhs_factors = Factors(*addend_lhs_it);
                 auto rhs_factors = Factors(*addend_rhs_it);
 
+                // Separate the factors into their coefficients and their variables
                 std::vector<std::shared_ptr<Node>> lhs_coefficients;
                 std::vector<std::shared_ptr<Node>> rhs_coefficients;
                 std::vector<std::shared_ptr<Node>> lhs_variables;
@@ -314,9 +328,12 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                 std::partition_copy(std::cbegin(lhs_factors), std::cend(lhs_factors), std::back_inserter(lhs_coefficients), std::back_inserter(lhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "Constant"; });
                 std::partition_copy(std::cbegin(rhs_factors), std::cend(rhs_factors), std::back_inserter(rhs_coefficients), std::back_inserter(rhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "Constant"; });
 
+                // Sort for std::equals
                 std::sort(std::begin(lhs_variables), std::end(lhs_variables));
                 std::sort(std::begin(rhs_variables), std::end(rhs_variables));
 
+                // Checks if two nodes are equivalent, that is that while they may not occupy the same memory,
+                // check if they will evaluate in the same manner and yield the same result
                 std::function<bool(std::shared_ptr<Node> const &, std::shared_ptr<Node> const &)> equivalent = [&equivalent](std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr) -> bool { 
                     if (lhs_ptr->Type() == rhs_ptr->Type()) {
                         std::vector<std::shared_ptr<Node>> lhs_args = lhs_ptr->Arguments();
@@ -344,7 +361,9 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                     return false;
                 };
 
+                // Check if the variables are equivalent
                 if (std::equal(std::cbegin(lhs_variables), std::cend(lhs_variables), std::cbegin(rhs_variables), equivalent)) {
+                    // If there are multiple coefficients per term, multiply them together and increment the coefficient                    
                     std::complex<double> coefficient;
                     
                     if (lhs_coefficients.empty()) {
@@ -360,9 +379,14 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                     else {
                         coefficient += std::transform_reduce(std::cbegin(rhs_coefficients), std::cend(rhs_coefficients), std::complex<double>(1.0, 0.0), [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { return product_coefficient * coefficient; }, [](std::shared_ptr<Node> const &rhs_coefficient) -> std::complex<double> { return std::get<std::complex<double>>(rhs_coefficient->Value()); });
                     }
-                                        
-                    *addend_lhs_it = std::shared_ptr<Multiplication>(new Multiplication({ std::shared_ptr<Constant>(new Constant(coefficient)), std::reduce(std::next(std::cbegin(lhs_variables)), std::cend(lhs_variables), lhs_variables.front(), [](std::shared_ptr<Node> const &recombined, std::shared_ptr<Node> const &lhs_variable) -> std::shared_ptr<Node> { return std::shared_ptr<Multiplication>(new Multiplication({ recombined, lhs_variable })); }) }));
 
+                    // Recombining the variables via repeated Multiplication
+                    std::shared_ptr<Node> combined_variables = std::reduce(std::next(std::cbegin(lhs_variables)), std::cend(lhs_variables), lhs_variables.front(), [](std::shared_ptr<Node> const &combined_variables, std::shared_ptr<Node> const &combined_variable) -> std::shared_ptr<Node> { return std::shared_ptr<Multiplication>(new Multiplication({ combined_variables, combined_variable })); });
+
+                    // Multiply by the coefficient
+                    *addend_lhs_it = std::shared_ptr<Multiplication>(new Multiplication({ std::shared_ptr<Constant>(new Constant(coefficient)), combined_variables }));
+
+                    // Remove the old term
                     addend_rhs_it = addends.erase(addend_rhs_it);
 
                     if (addend_rhs_it == std::end(addends)) {
@@ -372,7 +396,10 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
             }
         }
 
-        return std::reduce(std::next(std::cbegin(addends)), std::cend(addends), addends.front(), [](std::shared_ptr<Node> const &combined_ptr, std::shared_ptr<Node> const &combined_addend) { return std::shared_ptr<Addition>(new Addition({ combined_ptr, combined_addend })); });
+        // Sum the addends for the final result
+        std::shared_ptr<Node> combined_addends = std::reduce(std::next(std::cbegin(addends)), std::cend(addends), addends.front(), [](std::shared_ptr<Node> const &combined_addends, std::shared_ptr<Node> const &combined_addend) { return std::shared_ptr<Addition>(new Addition({ combined_addends, combined_addend })); });
+
+        return combined_addends;
     }
 
     return node_ptr;
