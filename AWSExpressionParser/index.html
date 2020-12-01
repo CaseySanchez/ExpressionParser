@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@2.18.0/dist/bootstrap-vue.css" />
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js" integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC+Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"></script>
+    <script src="https://unpkg.com/vue@2.6.12/dist/vue.js"></script>
+    <script src="https://unpkg.com/bootstrap-vue@2.18.0/dist/bootstrap-vue.js"></script>
+  </head>
+  <style>
+    a:hover { text-decoration: none; }
+  </style>
+  <body>  
+    <div id="app">
+      <b-container fluid>
+        <b-row>
+          <b-col>
+          </b-col>
+          <b-col cols="8">
+            <b-jumbotron class="mb-4">
+              <a href="?">
+                <h1>
+                  <span id="latex_title">
+                  </span>
+                  ExpressionParser
+                </h1>
+              </a>
+              <p>
+                For the source please visit our GitHub repository
+              </p>
+              <b-button variant="primary" href="https://github.com/Tannz0rz/expression_parser">
+                GitHub
+              </b-button>
+            </b-jumbotron>
+            <b-row class="mb-4">
+              <b-col>
+                <b-list-group>
+                  <component v-for="(variable_value, variable_name) in variables" :key="variable_name" :is="createVariableComponent(variable_value, variable_name)"></component>
+        
+                  <b-list-group-item class="d-flex pb-4" href="#">
+                    <b-input-group>
+                      <b-form-input placeholder="Variable name" v-model="input_variable_name" trim>
+                      </b-form-input>
+                      <b-form-input placeholder="Variable value" v-model="input_variable_value" trim>
+                      </b-form-input>
+                    </b-input-group>
+        
+                    <b-button class="ml-2 rounded-circle" variant="outline-success" @click="variableClick">
+                      +
+                    </b-button>
+                  </b-list-group-item>
+                </b-list-group>
+              </b-col>
+            </b-row>
+            <b-row class="mb-4">
+              <b-col>
+                <b-input-group>
+                  <b-dropdown :text="action">
+                    <b-dropdown-item-button @click="action='Evaluate'">
+                      Evaluate
+                    </b-dropdown-item-button>
+                    <b-dropdown-item-button @click="action='Simplify'">
+                      Simplify
+                    </b-dropdown-item-button>
+                    <b-dropdown-item-button @click="action='Solve for'">
+                      Solve for
+                    </b-dropdown-item-button>
+                  </b-dropdown>
+                  <b-form-input :disabled="!action.startsWith('Solve for')">
+                  </b-form-input>
+                </b-input-group>
+              </b-col>
+            </b-row>
+            <b-row class="mb-4">
+              <b-col>
+                <b-input-group>
+                  <b-form-input placeholder="LaTeX expression" v-model="expression" trim>
+                  </b-form-input>
+                  <b-input-group-append>
+                    <b-button variant="outline-primary" @click="goClick">
+                      Go
+                    </b-button>
+                  </b-input-group-append>
+                </b-input-group>
+              </b-col>
+            </b-row>
+            <b-row class="mb-4">
+              <b-col>
+                <b-row>
+                  <b-col class="text-center">
+                    <p>
+                      Expression
+                    </p>
+                  </b-col>
+                </b-row>
+                <b-row>
+                  <b-col class="text-center">
+                    <span ref="latex_render_input"></span>
+                  </b-col>
+                </b-row>
+              </b-col>
+              <b-col>
+                <b-row>
+                  <b-col class="text-center">
+                    <p>
+                      Result
+                    </p>
+                  </b-col>
+                </b-row>
+                <b-row>
+                  <b-col class="text-center">
+                    <span :hidden="loading_output" ref="latex_render_output">
+                    </span>
+                    <b-spinner :hidden="!loading_output" variant="primary" label="Spinning">
+                    </b-spinner>
+                  </b-col>
+                </b-row>
+              </b-col>
+            </b-row>
+          </b-col>
+          <b-col>
+          </b-col>
+        </b-row>
+      </b-container>
+    </div>
+    <script>
+      katex.render("L^AT_EX", latex_title);
+
+      function encode(str) {
+        //return encodeURIComponent(str).replace(/\(/g, "%28").replace(/\[/g, "%5B").replace(/\{/g, "%7B").replace(/\)/g, "%29").replace(/\]/g, "%5D").replace(/\}/g, "%7D").replace(/\*/g, "%2A").replace(/\+/g, "%2B").replace(/\-/g, "%2D").replace(/\//g, "%2F").replace(/\./g, "%2E");
+        return encodeURIComponent(btoa(str));
+      }
+
+      function decode(str) {
+        //return decodeURIComponent(str).replace(/\%28/g, "\(").replace(/\%5B/, "\[").replace(/\%7B/g, "\{").replace(/\%29/g, "\)").replace(/\%5D/g, "\]").replace(/\%7D/g, "\}").replace(/\%2A/g, "\*").replace(/\%2B/g, "\+").replace(/\%2D/g, "\-").replace(/\%2F/g, "\/").replace(/\%2E/g, "\.");
+        return atob(decodeURIComponent(str));
+      }
+
+      new Vue({
+        created() {
+          var params = new URLSearchParams(document.location.search.substr(1));
+
+          if (params.has("q")) {
+            let query = params.get("q");
+            let data = JSON.parse(decode(query));
+
+            this.action = data["action"];
+            this.expression = data["expression"];
+            this.variables = data["variables"];
+            
+            var request = new XMLHttpRequest();
+
+            request.addEventListener("load", () => {
+              this.result = request.response.replace(/ /g, "\\ ");
+
+              this.loading_output = false;
+            });
+
+            request.open("GET", "https://l9o7wanmdc.execute-api.us-east-2.amazonaws.com/prod/aws-expression-parser?q=" + query);
+
+            request.setRequestHeader("Content-Type", "application/json");
+
+            request.send();
+
+            this.loading_output = true;
+          }
+        },
+        el: '#app',
+        data: {
+          input_variable_name: '',
+          input_variable_value: '',
+          variables: { },
+          action: 'Evaluate',
+          expression: '',
+          result: '',
+          loading_output: false
+        },
+        watch: {
+          expression: function(value) {
+            katex.render(value, this.$refs.latex_render_input, { throwOnError: false });
+          },
+          result: function(value) {
+            katex.render(value, this.$refs.latex_render_output, { throwOnError: false }); 
+          }
+        },
+        methods: {
+          goClick: function() {
+            var json = JSON.stringify({
+              "action": this.action,
+              "expression": this.expression,
+              "variables": this.variables
+            });
+
+            var query = encode(json);
+
+            window.location.assign("index.html?q=" + query);
+          },
+          variableClick() {
+            if (this.input_variable_name != "" && this.input_variable_value != "") {
+              if (!(this.input_variable_name in this.variables)) {
+                this.variables[this.input_variable_name] = this.input_variable_value;
+
+                this.input_variable_name = "";
+                this.input_variable_value = "";
+              }
+            }
+          },
+          createVariableComponent(variable_value, variable_name) {
+            var self = this;
+
+            return {
+              functional: true,
+              render(h) {
+                const form_input_name = h("b-form-input", {
+                  props: {
+                    value: variable_name
+                  },
+                  on: {
+                    focusout: function (event) {
+                      var variables = { }; 
+
+                      for (const key in self.variables) {
+                        if (key != variable_name) {
+                          variables[key] = self.variables[key];
+                        }
+                      }
+
+                      variables[event.target.value] = self.variables[variable_name];
+
+                      self.variables = variables;
+
+                      variable_name = event.target.value;
+                    }
+                  }
+                });
+
+                const form_input_value = h("b-form-input", {
+                  props: {
+                    value: variable_value
+                  },
+                  on: {
+                    focusout: function (event) {
+                      self.variables[variable_name] = event.target.value;
+                    }
+                  }
+                });
+
+                const input_button = h("b-button", {
+                  staticClass: "ml-2 rounded-circle",
+                  props: {
+                    variant: "outline-danger"
+                  },
+                  on: {
+                    click() {
+                      var variables = { };
+
+                      for (const key in self.variables) {
+                        if (key != variable_name) {
+                          variables[key] = self.variables[key];
+                        }
+                      }
+
+                      self.variables = variables;
+                    }
+                  }
+                }, [
+                  "-"
+                ]);
+
+                const input_group = h("b-input-group", [
+                  form_input_name,
+                  form_input_value
+                ]);
+
+                return h("b-list-group-item", { 
+                  staticClass: "d-flex pb-4" 
+                }, [ 
+                  input_group, 
+                  input_button 
+                ]);
+              }
+            };
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

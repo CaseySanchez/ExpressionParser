@@ -6,6 +6,7 @@
 
 #include <expression_parser.hpp>
 #include <expression_composer.hpp>
+#include <expression_visualizer.hpp>
 
 int main(int argc, char *argv[])
 {
@@ -33,6 +34,9 @@ int main(int argc, char *argv[])
                 }
             }
         }
+
+        std::cout << "Visualized expression: " << std::endl;
+        std::cout << ExpressionVisualizer(psi, node_map) << std::endl;
 
         std::cout << "Re-composed expression from expression tree: " << std::endl;
         std::cout << ExpressionComposer(psi, node_map) << std::endl;

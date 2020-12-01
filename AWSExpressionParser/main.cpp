@@ -11,46 +11,33 @@
 #include <equation_parser.hpp>
 #include <complex_parser.hpp>
 
-#include "json.hpp"
-
 aws::lambda_runtime::invocation_response handler(aws::lambda_runtime::invocation_request const &request)
 {
     try {
-        nlohmann::json json = nlohmann::json::parse(request.payload);
+        Aws::Utils::Json::JsonValue json_value(request.payload.c_str());
+        Aws::Utils::Json::JsonView json_view(json_value);
 
-        if (!json.contains("action") || !json["action"].is_string()) {
+        if (!json_view.ValueExists("action") || !json_view.GetObject("action").IsString()) {
             throw std::invalid_argument("No action provided");
         }
 
-        if (!json.contains("expression") || !json["expression"].is_string()) {
+        if (!json_view.ValueExists("expression") || !json_view.GetObject("expression").IsString()) {
             throw std::invalid_argument("No expression provided");
         }
 
-        std::string action_str = json["action"].get<std::string>();
-        std::string expression_str = json["expression"].get<std::string>();;
+        std::string action_str(json_view.GetString("action").c_str());
+        std::string expression_str(json_view.GetString("expression").c_str());
 
         std::map<std::string, std::shared_ptr<Node>> node_map;
 
-        if (json.contains("variables") && json["variables"].is_object()) {
-            for (auto const &item : json["variables"].items()) { 
-                if (item.value().is_string()) {
-                    ComplexParser complex_parser(item.value().get<std::string>());
+        if (json_view.ValueExists("variables") && json_view.GetObject("variables").IsObject()) {
+            for (auto const &item : json_view.GetObject("variables").GetAllObjects()) { 
+                if (item.second.IsString()) {
+                    ComplexParser complex_parser(std::string(item.second.AsString().c_str()));
 
                     std::complex<double> complex = complex_parser.Parse();
 
-                    node_map[item.key()] = std::shared_ptr<Variable>(new Variable(complex));
-                }
-            }
-        }
-
-        if (json.contains("constants") && json["constants"].is_object()) {
-            for (auto const &item : json["constants"].items()) { 
-                if (item.value().is_string()) {
-                    ComplexParser complex_parser(item.value().get<std::string>());
-
-                    std::complex<double> complex = complex_parser.Parse();
-
-                    node_map[item.key()] = std::shared_ptr<Constant>(new Constant(complex));
+                    node_map[std::string(item.first.c_str())] = std::shared_ptr<Variable>(new Variable(complex));
                 }
             }
         }
@@ -79,7 +66,19 @@ aws::lambda_runtime::invocation_response handler(aws::lambda_runtime::invocation
 
             }
             else if (action_match[1].str() == "Simplify") {
+                try {
+                    ExpressionParser expression_parser(expression_str, node_map);
 
+                    std::shared_ptr<Node> node_ptr(expression_parser.Parse());
+
+                    ExpressionSimplifier expression_simplifier(node_ptr, node_map);
+
+                    std::shared_ptr<Node> simplified_ptr = expression_simplifier.Simplify();
+
+                    response_stream << ExpressionComposer(simplified_ptr, node_map);
+                }
+                catch(std::invalid_argument const &) {
+                }
             }
             else {
                 throw std::invalid_argument("No action provided");
