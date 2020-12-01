@@ -35,11 +35,11 @@ int main(int argc, char *argv[])
             }
         }
 
-        std::cout << "Visualized expression: " << std::endl;
-        std::cout << ExpressionVisualizer(psi, node_map) << std::endl;
+        std::cout << "Visualized expression tree: " << std::endl;
+        std::cout << ExpressionVisualizer(psi, node_map) << std::endl << std::endl;
 
         std::cout << "Re-composed expression from expression tree: " << std::endl;
-        std::cout << ExpressionComposer(psi, node_map) << std::endl;
+        std::cout << ExpressionComposer(psi, node_map) << std::endl << std::endl;
     }
     catch(std::exception const &exception) {
         std::cout << exception.what() << std::endl;

@@ -27,11 +27,11 @@ int main(int argc, char *argv[])
             std::cout << "r(" << static_cast<Node>(*theta) << ") * v = " << matrix_node << std::endl;
         }
 
-        std::cout << "Visualized expression: " << std::endl;
-        std::cout << ExpressionVisualizer(matrix_node, node_map) << std::endl;
+        std::cout << "Visualized expression tree: " << std::endl;
+        std::cout << ExpressionVisualizer(matrix_node, node_map) << std::endl << std::endl;
 
         std::cout << "Re-composed expression from expression tree: " << std::endl;
-        std::cout << ExpressionComposer(matrix_node, node_map) << std::endl;
+        std::cout << ExpressionComposer(matrix_node, node_map) << std::endl << std::endl;
     }
     catch(std::exception const &exception) {
         std::cout << exception.what() << std::endl;

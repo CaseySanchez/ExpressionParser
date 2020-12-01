@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(ExpressionParser SHARED node.cpp operations.cpp functions.cpp matrix.cpp expression_parser.cpp expression_composer.cpp expression_simplifier.cpp equation_parser.cpp complex_parser.cpp expression_visualizer.cpp utils.cpp)
 
-set_property(TARGET ExpressionParser PROPERTY CXX_STANDARD 17)
+set_target_properties(ExpressionParser PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES CXX_EXTENSIONS NO)
 
 link_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
