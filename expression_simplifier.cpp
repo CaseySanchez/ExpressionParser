@@ -246,8 +246,8 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
                         rhs_variable = (*rhs_variable_it);
                     }
 
-                    // If the variables are the same sum their degrees
-                    if (lhs_variable == rhs_variable) {
+                    // If the variables are equivalent sum their degrees
+                    if (Node::Equivalent(lhs_variable, rhs_variable)) {
                         std::shared_ptr<Node> lhs_degree;
                         std::shared_ptr<Node> rhs_degree;
                         
@@ -328,41 +328,14 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                 std::partition_copy(std::cbegin(lhs_factors), std::cend(lhs_factors), std::back_inserter(lhs_coefficients), std::back_inserter(lhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "Constant"; });
                 std::partition_copy(std::cbegin(rhs_factors), std::cend(rhs_factors), std::back_inserter(rhs_coefficients), std::back_inserter(rhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "Constant"; });
 
-                // Sort for std::equals
-                std::sort(std::begin(lhs_variables), std::end(lhs_variables));
-                std::sort(std::begin(rhs_variables), std::end(rhs_variables));
+                // Check if all of the variables are equivalent
+                bool all_of = true;
 
-                // Checks if two nodes are equivalent, that is that while they may not occupy the same memory,
-                // check if they will evaluate in the same manner and yield the same result
-                std::function<bool(std::shared_ptr<Node> const &, std::shared_ptr<Node> const &)> equivalent = [&equivalent](std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr) -> bool { 
-                    if (lhs_ptr->Type() == rhs_ptr->Type()) {
-                        std::vector<std::shared_ptr<Node>> lhs_args = lhs_ptr->Arguments();
-                        std::vector<std::shared_ptr<Node>> rhs_args = rhs_ptr->Arguments();
+                for (auto lhs_variable : lhs_variables) {
+                    all_of = all_of && std::find_if(std::cbegin(rhs_variables), std::cend(rhs_variables), [&lhs_variable](std::shared_ptr<Node> const &rhs_variable) -> bool { return Node::Equivalent(lhs_variable, rhs_variable); }) != std::cend(rhs_variables);
+                }
 
-                        if (lhs_args.size() == 0) {
-                            if (lhs_ptr->Type() == "Variable") {
-                                return lhs_ptr == rhs_ptr;
-                            }
-                            else if (lhs_ptr->Type() == "Constant") {
-                                return Approximately(std::get<std::complex<double>>(lhs_ptr->Value()), std::get<std::complex<double>>(rhs_ptr->Value()));
-                            }
-                        }
-                        else {
-                            for (auto lhs_arg : lhs_args) {
-                                if (std::find_if(std::cbegin(rhs_args), std::cend(rhs_args), [&lhs_arg, &equivalent](std::shared_ptr<Node> const &rhs_arg) -> bool { return equivalent(lhs_arg, rhs_arg); }) == std::cend(rhs_args)) {
-                                    return false;
-                                }
-                            }
-
-                            return true;
-                        }
-                    }
-                    
-                    return false;
-                };
-
-                // Check if the variables are equivalent
-                if (std::equal(std::cbegin(lhs_variables), std::cend(lhs_variables), std::cbegin(rhs_variables), equivalent)) {
+                if (all_of) {
                     // If there are multiple coefficients per term, multiply them together and increment the coefficient                    
                     std::complex<double> coefficient;
                     

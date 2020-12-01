@@ -18,7 +18,7 @@
 #include "utils.hpp"
 
 class Node : protected std::enable_shared_from_this<Node>
-{
+{    
 protected:
     std::variant<Matrix, std::complex<double>> m_value;
     std::vector<std::shared_ptr<Node>> m_arguments;
@@ -35,6 +35,8 @@ public:
     virtual std::variant<Matrix, std::complex<double>> Value() const;
 
 public:
+    static bool Equivalent(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
+
     friend std::ostream &operator<<(std::ostream &ostream, Node const &node);
     friend std::ostream &operator<<(std::ostream &ostream, std::shared_ptr<Node> const &node_ptr);
 };
