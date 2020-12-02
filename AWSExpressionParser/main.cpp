@@ -37,12 +37,14 @@ aws::lambda_runtime::invocation_response handler(aws::lambda_runtime::invocation
 
                     std::complex<double> complex = complex_parser.Parse();
 
-                    node_map[std::string(item.first.c_str())] = std::shared_ptr<Variable>(new Variable(complex));
+                    node_map[std::string(item.first.c_str())] = std::shared_ptr<VariableNode>(new VariableNode(complex));
                 }
             }
         }
 
         std::ostringstream response_stream;
+
+        response_stream << "\\begin{aligned}";
         
         std::regex action_regex("^(Evaluate|Solve for|Simplify)(.*)$");
         std::smatch action_match;
@@ -66,18 +68,42 @@ aws::lambda_runtime::invocation_response handler(aws::lambda_runtime::invocation
 
             }
             else if (action_match[1].str() == "Simplify") {
-                try {
-                    ExpressionParser expression_parser(expression_str, node_map);
+                ExpressionParser expression_parser(expression_str, node_map);
+                
+                std::shared_ptr<Node> node_ptr(expression_parser.Parse());
 
-                    std::shared_ptr<Node> node_ptr(expression_parser.Parse());
+                response_stream << "&=" << ExpressionComposer(node_ptr, node_map) << "\\\\";
 
-                    ExpressionSimplifier expression_simplifier(node_ptr, node_map);
+                std::shared_ptr<Node> distributed_ptr = ExpressionSimplifier(node_ptr, node_map).Distribute();
 
-                    std::shared_ptr<Node> simplified_ptr = expression_simplifier.Simplify();
-
-                    response_stream << ExpressionComposer(simplified_ptr, node_map);
+                if (!Node::Equivalent(distributed_ptr, node_ptr)) {
+                    response_stream << "&=" << ExpressionComposer(distributed_ptr, node_map) << "\\\\";
                 }
-                catch(std::invalid_argument const &) {
+
+                std::shared_ptr<Node> distributed_identified_ptr = ExpressionSimplifier(distributed_ptr, node_map).Identify();
+
+                if (!Node::Equivalent(distributed_identified_ptr, distributed_ptr)) {
+                    response_stream << "&=" << ExpressionComposer(distributed_identified_ptr, node_map) << "\\\\";
+                }
+
+                std::shared_ptr<Node> combined_factors_ptr = ExpressionSimplifier(distributed_identified_ptr, node_map).CombineFactors();
+                
+                response_stream << "&=" << ExpressionComposer(combined_factors_ptr, node_map) << "\\\\";
+
+                std::shared_ptr<Node> combined_factors_identified_ptr = ExpressionSimplifier(combined_factors_ptr, node_map).Identify();
+
+                if (!Node::Equivalent(combined_factors_identified_ptr, combined_factors_ptr)) {
+                    response_stream << "&=" << ExpressionComposer(combined_factors_identified_ptr, node_map) << "\\\\";
+                }
+
+                std::shared_ptr<Node> combined_addends_ptr = ExpressionSimplifier(combined_factors_identified_ptr, node_map).CombineAddends();
+
+                response_stream << "&=" << ExpressionComposer(combined_addends_ptr, node_map) << "\\\\";
+
+                std::shared_ptr<Node> combined_addends_identified_ptr = ExpressionSimplifier(combined_addends_ptr, node_map).Identify();
+
+                if (!Node::Equivalent(combined_addends_identified_ptr, combined_addends_ptr)) {
+                    response_stream << "&=" << ExpressionComposer(combined_addends_identified_ptr, node_map);
                 }
             }
             else {
@@ -88,6 +114,8 @@ aws::lambda_runtime::invocation_response handler(aws::lambda_runtime::invocation
             throw std::invalid_argument("No action provided");
         }
 
+        response_stream << "\\end{aligned}";
+        
         return aws::lambda_runtime::invocation_response(response_stream.str(), "text/plain", true);
     }
     catch (std::exception const &exception) {

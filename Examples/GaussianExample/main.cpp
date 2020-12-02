@@ -11,11 +11,11 @@
 int main(int argc, char *argv[])
 {
     try {
-        std::shared_ptr<Constant> pi(new Constant(3.14159265358979323846));
-        std::shared_ptr<Constant> e(new Constant(2.71828182845904523536));
-        std::shared_ptr<Variable> x(new Variable(0.0));
-        std::shared_ptr<Variable> y(new Variable(0.0));
-        std::shared_ptr<Variable> z(new Variable(0.0));
+        std::shared_ptr<ConstantNode> pi(new ConstantNode(3.14159265358979323846));
+        std::shared_ptr<ConstantNode> e(new ConstantNode(2.71828182845904523536));
+        std::shared_ptr<VariableNode> x(new VariableNode(0.0));
+        std::shared_ptr<VariableNode> y(new VariableNode(0.0));
+        std::shared_ptr<VariableNode> z(new VariableNode(0.0));
 
         std::map<std::string, std::shared_ptr<Node>> node_map = { { "pi", pi }, { "e", e }, { "x", x }, { "y", y }, { "z", z } };
 

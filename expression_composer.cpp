@@ -24,30 +24,28 @@ void ExpressionComposer::Compose(std::ostream &ostream) const
 
 void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> const &node_ptr, uint32_t const &precedence) const
 {
-    if (node_ptr->Type() == "Node") {
-        if (std::holds_alternative<Matrix>(node_ptr->Value())) {
-            Matrix matrix = std::get<Matrix>(node_ptr->Value());
+    if (node_ptr->Type() == "MatrixNode") {
+        Matrix matrix = node_ptr->MatrixValue();
 
-            ostream << "\\begin{bmatrix}";
+        ostream << "\\begin{bmatrix}";
 
-            for (size_t i = 0; i < matrix.Rows(); ++i) {
-                for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    ostream << ExpressionComposer(matrix(i, j), m_node_map);
-            
-                    if (j < matrix.Cols() - 1) {
-                        ostream << "&";
-                    }
-                }
-
-                if (i < matrix.Rows() - 1) {
-                    ostream << "\\\\";
+        for (size_t i = 0; i < matrix.Rows(); ++i) {
+            for (size_t j = 0; j < matrix.Cols(); ++j) {
+                ostream << ExpressionComposer(matrix(i, j), m_node_map);
+        
+                if (j < matrix.Cols() - 1) {
+                    ostream << "&";
                 }
             }
 
-            ostream << "\\end{bmatrix}";
+            if (i < matrix.Rows() - 1) {
+                ostream << "\\\\";
+            }
         }
+
+        ostream << "\\end{bmatrix}";
     }
-    else if (node_ptr->Type() == "Variable") {
+    else if (node_ptr->Type() == "VariableNode") {
         auto node_it = std::find_if(std::cbegin(m_node_map), std::cend(m_node_map), 
             [&node_ptr](std::pair<std::string, std::shared_ptr<Node>> const &node_pair) {  
                 return node_pair.second == node_ptr;
@@ -60,7 +58,7 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
             ostream << node_ptr;
         }
     }
-    else if (node_ptr->Type() == "Constant") {
+    else if (node_ptr->Type() == "ConstantNode") {
         auto node_it = std::find_if(std::cbegin(m_node_map), std::cend(m_node_map), 
             [&node_ptr](std::pair<std::string, std::shared_ptr<Node>> const &node_pair) {  
                 return node_pair.second == node_ptr;
@@ -73,15 +71,26 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
             ostream << node_ptr;
         }
     }
-    else if (node_ptr->Type() == "Exponentiation") {
-        Compose(ostream, node_ptr->Argument(0), 0);
+    else if (node_ptr->Type() == "ExponentiationNode") {
+        Compose(ostream, node_ptr->Argument(0), 1);
         
         ostream << "^"; 
         
-        Compose(ostream, node_ptr->Argument(1), 0);
+        Compose(ostream, node_ptr->Argument(1), 1);
     }
-    else if (node_ptr->Type() == "Multiplication") {
-        if (precedence < 2) {
+    else if (node_ptr->Type() == "MultiplicationNode") {
+        if (precedence == 1) {
+            ostream << "{"; 
+            
+            Compose(ostream, node_ptr->Argument(0), 2);
+            
+            ostream << "*"; 
+            
+            Compose(ostream, node_ptr->Argument(1), 2);
+            
+            ostream << "}";
+        }
+        else if (precedence < 2) {
             ostream << "\\left("; 
             
             Compose(ostream, node_ptr->Argument(0), 2);
@@ -100,8 +109,19 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
             Compose(ostream, node_ptr->Argument(1), 2);
         }
     }
-    else if (node_ptr->Type() == "Division") {
-        if (precedence < 2) {
+    else if (node_ptr->Type() == "DivisionNode") {
+        if (precedence == 1) {
+            ostream << "{";
+            
+            Compose(ostream, node_ptr->Argument(0), 2);
+            
+            ostream << "/";
+            
+            Compose(ostream, node_ptr->Argument(1), 2);
+            
+            ostream << "}";
+        }
+        else if (precedence < 2) {
             ostream << "\\left(";
             
             Compose(ostream, node_ptr->Argument(0), 2);
@@ -120,8 +140,19 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
             Compose(ostream, node_ptr->Argument(1), 2);
         }
     }
-    else if (node_ptr->Type() == "Addition") {
-        if (precedence < 3) {
+    else if (node_ptr->Type() == "AdditionNode") {
+        if (precedence == 1) {
+            ostream << "{";
+            
+            Compose(ostream, node_ptr->Argument(0), 3);
+            
+            ostream << "+";
+            
+            Compose(ostream, node_ptr->Argument(1), 3);
+            
+            ostream << "}";
+        }
+        else if (precedence < 3) {
             ostream << "\\left(";
             
             Compose(ostream, node_ptr->Argument(0), 3);
@@ -140,8 +171,19 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
             Compose(ostream, node_ptr->Argument(1), 3);
         }
     }
-    else if (node_ptr->Type() == "Subtraction") {
-        if (precedence < 3) {
+    else if (node_ptr->Type() == "SubtractionNode") {
+        if (precedence == 1) {
+            ostream << "{";
+            
+            Compose(ostream, node_ptr->Argument(0), 3);
+            
+            ostream << "-";
+            
+            Compose(ostream, node_ptr->Argument(1), 3);
+            
+            ostream << "}";
+        }
+        else if (precedence < 3) {
             ostream << "\\left(";
             
             Compose(ostream, node_ptr->Argument(0), 3);
@@ -160,62 +202,62 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
             Compose(ostream, node_ptr->Argument(1), 3);
         }
     }
-    else if (node_ptr->Type() == "Sin") {
+    else if (node_ptr->Type() == "SinNode") {
         ostream << "sin";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Cos") {
+    else if (node_ptr->Type() == "CosNode") {
         ostream << "cos";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Tan") {
+    else if (node_ptr->Type() == "TanNode") {
         ostream << "tan";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Asin") {
+    else if (node_ptr->Type() == "AsinNode") {
         ostream << "asin";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Acos") {
+    else if (node_ptr->Type() == "AcosNode") {
         ostream << "acos";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Atan") {
+    else if (node_ptr->Type() == "AtanNode") {
         ostream << "atan";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Sqrt") {
+    else if (node_ptr->Type() == "SqrtNode") {
         ostream << "sqrt";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Abs") {
+    else if (node_ptr->Type() == "AbsNode") {
         ostream << "abs";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Exp") {
+    else if (node_ptr->Type() == "ExpNode") {
         ostream << "exp";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Log") {
+    else if (node_ptr->Type() == "LogNode") {
         ostream << "log";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Determinant") {
+    else if (node_ptr->Type() == "DeterminantNode") {
         ostream << "det";
         
         Compose(ostream, node_ptr->Argument(0), 0);
     }
-    else if (node_ptr->Type() == "Inverse") {
+    else if (node_ptr->Type() == "InverseNode") {
         ostream << "inv";
         
         Compose(ostream, node_ptr->Argument(0), 0);
@@ -224,7 +266,6 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
         throw std::invalid_argument("Node of unknown type: " + node_ptr->Type());
     }
 }
-
 
 std::ostream &operator<<(std::ostream &ostream, ExpressionComposer const &expression_composer)
 {

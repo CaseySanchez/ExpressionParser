@@ -11,7 +11,7 @@
 #include "node.hpp"
 #include "matrix.hpp"
 
-class Exponentiation : public Node
+class ExponentiationNode : public Node
 {
     struct Visitor
     {
@@ -37,14 +37,14 @@ class Exponentiation : public Node
     };
 
 public:
-    Exponentiation(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    ExponentiationNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Multiplication : public Node
+class MultiplicationNode : public Node
 {
     struct Visitor
     {
@@ -70,14 +70,14 @@ class Multiplication : public Node
     };
 
 public:
-    Multiplication(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    MultiplicationNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Division : public Node
+class DivisionNode : public Node
 {
     struct Visitor
     {
@@ -103,14 +103,14 @@ class Division : public Node
     };
 
 public:
-    Division(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    DivisionNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Addition : public Node
+class AdditionNode : public Node
 {
     struct Visitor
     {
@@ -136,14 +136,14 @@ class Addition : public Node
     };
 
 public:
-    Addition(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    AdditionNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Subtraction : public Node
+class SubtractionNode : public Node
 {
     struct Visitor
     {
@@ -169,7 +169,7 @@ class Subtraction : public Node
     };
 
 public:
-    Subtraction(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    SubtractionNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 

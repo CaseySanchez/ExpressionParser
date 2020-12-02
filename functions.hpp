@@ -10,7 +10,7 @@
 #include "node.hpp"
 #include "matrix.hpp"
 
-class Cos : public Node
+class CosNode : public Node
 {
     struct Visitor
     {
@@ -25,7 +25,7 @@ class Cos : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<Cos>(new Cos({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<CosNode>(new CosNode({ value(i, j) }));
                 }
             }
 
@@ -34,14 +34,14 @@ class Cos : public Node
     };
 
 public:
-    Cos(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    CosNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Sin : public Node
+class SinNode : public Node
 {
     struct Visitor
     {
@@ -56,7 +56,7 @@ class Sin : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<Sin>(new Sin({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<SinNode>(new SinNode({ value(i, j) }));
                 }
             }
 
@@ -65,14 +65,14 @@ class Sin : public Node
     };
 
 public:
-    Sin(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    SinNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Tan : public Node
+class TanNode : public Node
 {
     struct Visitor
     {
@@ -87,7 +87,7 @@ class Tan : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<Tan>(new Tan({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<TanNode>(new TanNode({ value(i, j) }));
                 }
             }
 
@@ -96,14 +96,14 @@ class Tan : public Node
     };
 
 public:
-    Tan(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    TanNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Acos : public Node
+class AcosNode : public Node
 {
     struct Visitor
     {
@@ -118,7 +118,7 @@ class Acos : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<Acos>(new Acos({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<AcosNode>(new AcosNode({ value(i, j) }));
                 }
             }
 
@@ -127,14 +127,14 @@ class Acos : public Node
     };
 
 public:
-    Acos(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    AcosNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Asin : public Node
+class AsinNode : public Node
 {
     struct Visitor
     {
@@ -149,7 +149,7 @@ class Asin : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<Asin>(new Asin({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<AsinNode>(new AsinNode({ value(i, j) }));
                 }
             }
 
@@ -158,14 +158,14 @@ class Asin : public Node
     };
 
 public:
-    Asin(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    AsinNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Atan : public Node
+class AtanNode : public Node
 {
     struct Visitor
     {
@@ -180,7 +180,7 @@ class Atan : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<Atan>(new Atan({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<AtanNode>(new AtanNode({ value(i, j) }));
                 }
             }
 
@@ -189,14 +189,14 @@ class Atan : public Node
     };
 
 public:
-    Atan(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    AtanNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Sqrt : public Node
+class SqrtNode : public Node
 {
     struct Visitor
     {
@@ -211,7 +211,7 @@ class Sqrt : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<Sqrt>(new Sqrt({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<SqrtNode>(new SqrtNode({ value(i, j) }));
                 }
             }
 
@@ -220,14 +220,14 @@ class Sqrt : public Node
     };
 
 public:
-    Sqrt(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    SqrtNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Abs : public Node
+class AbsNode : public Node
 {
     struct Visitor
     {
@@ -242,7 +242,7 @@ class Abs : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<Abs>(new Abs({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<AbsNode>(new AbsNode({ value(i, j) }));
                 }
             }
 
@@ -251,14 +251,14 @@ class Abs : public Node
     };
 
 public:
-    Abs(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    AbsNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Exp : public Node
+class ExpNode : public Node
 {
     struct Visitor
     {
@@ -273,7 +273,7 @@ class Exp : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<Exp>(new Exp({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<ExpNode>(new ExpNode({ value(i, j) }));
                 }
             }
 
@@ -282,14 +282,14 @@ class Exp : public Node
     };
 
 public:
-    Exp(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    ExpNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Log : public Node
+class LogNode : public Node
 {
     struct Visitor
     {
@@ -304,7 +304,7 @@ class Log : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<Log>(new Log({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<LogNode>(new LogNode({ value(i, j) }));
                 }
             }
 
@@ -313,14 +313,14 @@ class Log : public Node
     };
 
 public:
-    Log(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    LogNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Determinant : public Node
+class DeterminantNode : public Node
 {
     struct Visitor
     {
@@ -338,14 +338,14 @@ class Determinant : public Node
     };
 
 public:
-    Determinant(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    DeterminantNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class Inverse : public Node
+class InverseNode : public Node
 {
     struct Visitor
     {
@@ -361,7 +361,30 @@ class Inverse : public Node
     };
 
 public:
-    Inverse(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    InverseNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+
+    std::string Type() const override;
+
+    std::variant<Matrix, std::complex<double>> Value() const override;
+};
+
+class Derivative : public Node
+{
+    struct Visitor
+    {
+        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
+        {
+            return value;
+        }
+
+        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
+        {
+            return value;
+        }
+    };
+
+public:
+    Derivative(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 

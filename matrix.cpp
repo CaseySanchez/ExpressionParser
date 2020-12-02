@@ -48,7 +48,7 @@ Matrix Matrix::operator+(Matrix const &other) const
 
     for (size_t i = 0; i < Rows(); ++i) {
         for (size_t j = 0; j < Cols(); ++j) {
-            matrix(i, j) = std::shared_ptr<Addition>(new Addition({ (*this)(i, j), other(i, j) }));
+            matrix(i, j) = std::shared_ptr<AdditionNode>(new AdditionNode({ (*this)(i, j), other(i, j) }));
         }
     }
 
@@ -59,11 +59,11 @@ Matrix Matrix::operator+(std::complex<double> const &other) const
 {
     Matrix matrix(Rows(), Cols());
 
-    std::shared_ptr<Constant> constant_ptr(new Constant(other));
+    std::shared_ptr<ConstantNode> constant_ptr(new ConstantNode(other));
 
     for (size_t i = 0; i < Rows(); ++i) {
         for (size_t j = 0; j < Cols(); ++j) {
-            matrix(i, j) = std::shared_ptr<Addition>(new Addition({ (*this)(i, j), constant_ptr }));
+            matrix(i, j) = std::shared_ptr<AdditionNode>(new AdditionNode({ (*this)(i, j), constant_ptr }));
         }
     }
 
@@ -80,7 +80,7 @@ Matrix Matrix::operator-(Matrix const &other) const
 
     for (size_t i = 0; i < Rows(); ++i) {
         for (size_t j = 0; j < Cols(); ++j) {
-            matrix(i, j) = std::shared_ptr<Subtraction>(new Subtraction({ (*this)(i, j), other(i, j) }));
+            matrix(i, j) = std::shared_ptr<SubtractionNode>(new SubtractionNode({ (*this)(i, j), other(i, j) }));
         }
     }
 
@@ -91,11 +91,11 @@ Matrix Matrix::operator-(std::complex<double> const &other) const
 {
     Matrix matrix(Rows(), Cols());
 
-    std::shared_ptr<Constant> constant_ptr(new Constant(other));
+    std::shared_ptr<ConstantNode> constant_ptr(new ConstantNode(other));
 
     for (size_t i = 0; i < Rows(); ++i) {
         for (size_t j = 0; j < Cols(); ++j) {
-            matrix(i, j) = std::shared_ptr<Subtraction>(new Subtraction({ (*this)(i, j), constant_ptr }));
+            matrix(i, j) = std::shared_ptr<SubtractionNode>(new SubtractionNode({ (*this)(i, j), constant_ptr }));
         }
     }
 
@@ -112,12 +112,12 @@ Matrix Matrix::operator*(Matrix const &other) const
 
     for (size_t i = 0; i < Rows(); ++i) {
         for (size_t j = 0; j < other.Cols(); ++j) {
-            std::shared_ptr<Node> sum(new Constant(0.0));
+            std::shared_ptr<Node> sum(new ConstantNode(0.0));
 
             for (size_t k = 0; k < Cols(); ++k) {
-                std::shared_ptr<Multiplication> product(new Multiplication({ (*this)(i, k), other(k, j) }));
+                std::shared_ptr<MultiplicationNode> product(new MultiplicationNode({ (*this)(i, k), other(k, j) }));
                 
-                sum = std::shared_ptr<Addition>(new Addition({ sum, product }));
+                sum = std::shared_ptr<AdditionNode>(new AdditionNode({ sum, product }));
             }
 
             matrix(i, j) = sum;
@@ -131,11 +131,11 @@ Matrix Matrix::operator*(std::complex<double> const &other) const
 {
     Matrix matrix(Rows(), Cols());
 
-    std::shared_ptr<Constant> constant_ptr(new Constant(other));
+    std::shared_ptr<ConstantNode> constant_ptr(new ConstantNode(other));
 
     for (size_t i = 0; i < Rows(); ++i) {
         for (size_t j = 0; j < Cols(); ++j) {
-            matrix(i, j) = std::shared_ptr<Multiplication>(new Multiplication({ (*this)(i, j), constant_ptr }));
+            matrix(i, j) = std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ (*this)(i, j), constant_ptr }));
         }
     }
 
@@ -154,10 +154,10 @@ Matrix Matrix::operator^(int32_t const &other) const
         for (size_t i = 0; i < Rows(); ++i) {
             for (size_t j = 0; j < Cols(); ++j) {
                 if (i == j) {
-                    identity(i, j) = std::shared_ptr<Constant>(new Constant(1.0));
+                    identity(i, j) = std::shared_ptr<ConstantNode>(new ConstantNode(1.0));
                 }
                 else {
-                    identity(i, j) = std::shared_ptr<Constant>(new Constant(0.0));
+                    identity(i, j) = std::shared_ptr<ConstantNode>(new ConstantNode(0.0));
                 }
             }
         }
@@ -199,14 +199,14 @@ std::shared_ptr<Node> Matrix::Determinant() const
         return (*this)(0, 0);
     }
 
-    std::shared_ptr<Node> determinant(new Constant(0.0));
+    std::shared_ptr<Node> determinant(new ConstantNode(0.0));
 
     for (size_t j = 0; j < Cols(); ++j) {
-        std::shared_ptr<Multiplication> product(new Multiplication({ (*this)(0, j), Minor(0, j) }));
+        std::shared_ptr<MultiplicationNode> product(new MultiplicationNode({ (*this)(0, j), Minor(0, j) }));
 
-        product = std::shared_ptr<Multiplication>(new Multiplication({ product, std::shared_ptr<Constant>(new Constant(j % 2 == 0 ? 1.0 : -1.0)) }));
+        product = std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ product, std::shared_ptr<ConstantNode>(new ConstantNode(j % 2 == 0 ? 1.0 : -1.0)) }));
 
-        determinant = std::shared_ptr<Addition>(new Addition({ determinant, product }));
+        determinant = std::shared_ptr<AdditionNode>(new AdditionNode({ determinant, product }));
     }
 
     return determinant;
@@ -250,11 +250,11 @@ Matrix Matrix::Inverse() const
 
     std::shared_ptr<Node> determinant = Determinant();
 
-    if (std::fabs(std::get<std::complex<double>>(determinant->Value())) < 10e-7) {
+    if (std::fabs(determinant->ComplexValue()) < 10e-9) {
         throw std::invalid_argument("Matrix is singular");
     }
 
-    std::shared_ptr<Division> determinant_inverse(new Division({ std::shared_ptr<Constant>(new Constant(1.0)), determinant }));
+    std::shared_ptr<DivisionNode> determinant_inverse(new DivisionNode({ std::shared_ptr<ConstantNode>(new ConstantNode(1.0)), determinant }));
 
     if (Rows() == 1) {
         Matrix matrix(1, 1);
@@ -268,7 +268,7 @@ Matrix Matrix::Inverse() const
 
     for (size_t i = 0; i < Rows(); ++i) {
         for (size_t j = 0; j < Cols(); ++j) {
-            cofactor(i, j) = std::shared_ptr<Multiplication>(new Multiplication({ Minor(i, j), std::shared_ptr<Constant>(new Constant((i + j) % 2 == 0 ? 1.0 : -1.0)) })); 
+            cofactor(i, j) = std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ Minor(i, j), std::shared_ptr<ConstantNode>(new ConstantNode((i + j) % 2 == 0 ? 1.0 : -1.0)) })); 
         }
     }
 
@@ -280,7 +280,7 @@ Matrix Matrix::Inverse() const
                 determinant_matrix(i, j) = determinant_inverse;
             }
             else {
-                determinant_matrix(i, j) = std::shared_ptr<Constant>(new Constant(0.0));
+                determinant_matrix(i, j) = std::shared_ptr<ConstantNode>(new ConstantNode(0.0));
             }
         }
     }

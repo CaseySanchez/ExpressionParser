@@ -26,7 +26,6 @@ class ExpressionSimplifier
 public:
     ExpressionSimplifier(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map);
 
-    std::shared_ptr<Node> Simplify();
     std::shared_ptr<Node> Identify();
     std::shared_ptr<Node> Distribute();
     std::shared_ptr<Node> CombineFactors();

@@ -17,7 +17,17 @@ std::shared_ptr<Node> &Node::Argument(size_t const &index)
     return m_arguments.at(index);
 }
 
+std::shared_ptr<Node> Node::Argument(size_t const &index) const
+{
+    return m_arguments.at(index);
+}
+
 std::vector<std::shared_ptr<Node>> &Node::Arguments()
+{
+    return m_arguments;
+}
+
+std::vector<std::shared_ptr<Node>> Node::Arguments() const
 {
     return m_arguments;
 }
@@ -32,6 +42,16 @@ std::variant<Matrix, std::complex<double>> Node::Value() const
     return m_value;
 }
 
+std::complex<double> Node::ComplexValue() const
+{
+    return std::get<std::complex<double>>(Value());
+}
+
+Matrix Node::MatrixValue() const
+{
+    return std::get<Matrix>(Value());
+}
+
 bool Node::Equivalent(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr)
 { 
     if (lhs_ptr->Type() == rhs_ptr->Type()) {
@@ -39,11 +59,11 @@ bool Node::Equivalent(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node
         std::vector<std::shared_ptr<Node>> rhs_args = rhs_ptr->Arguments();
 
         if (lhs_args.size() == 0) {
-            if (lhs_ptr->Type() == "Variable") {
+            if (lhs_ptr->Type() == "VariableNode") {
                 return lhs_ptr == rhs_ptr;
             }
-            else if (lhs_ptr->Type() == "Constant") {
-                return Approximately(std::get<std::complex<double>>(lhs_ptr->Value()), std::get<std::complex<double>>(rhs_ptr->Value()));
+            else if (lhs_ptr->Type() == "ConstantNode") {
+                return Approximately(lhs_ptr->ComplexValue(), rhs_ptr->ComplexValue());
             }
         }
         else {
@@ -94,27 +114,36 @@ std::ostream &operator<<(std::ostream &ostream, std::shared_ptr<Node> const &nod
     return ostream;
 }
 
-Variable::Variable(std::complex<double> const &value) : Node(value)
+VariableNode::VariableNode(std::complex<double> const &value) : Node(value)
 {
 }
 
-std::string Variable::Type() const
+std::string VariableNode::Type() const
 {
-    return "Variable";
+    return "VariableNode";
 }
 
-Node &Variable::operator=(std::complex<double> const &value)
+Node &VariableNode::operator=(std::complex<double> const &value)
 {
     m_value = value;
 
     return *this;
 }
 
-Constant::Constant(std::complex<double> const &value) : Node(value)
+ConstantNode::ConstantNode(std::complex<double> const &value) : Node(value)
 {
 }
 
-std::string Constant::Type() const
+std::string ConstantNode::Type() const
 {
-    return "Constant";
+    return "ConstantNode";
+}
+
+MatrixNode::MatrixNode(Matrix const &value) : Node(value)
+{
+}
+
+std::string MatrixNode::Type() const
+{
+    return "MatrixNode";
 }

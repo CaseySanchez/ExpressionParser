@@ -31,18 +31,18 @@ std::string ExpressionParserContext::NextMatrixName()
 }
 
 std::map<std::string, std::function<std::shared_ptr<Node>(std::shared_ptr<Node>)>> ExpressionParser::s_function_map {
-    { "cos", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Cos>(new Cos({ node_ptr })); } },
-    { "sin", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Sin>(new Sin({ node_ptr })); } },
-    { "tan", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Tan>(new Tan({ node_ptr })); } },
-    { "acos", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Acos>(new Acos({ node_ptr })); } },
-    { "asin", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Asin>(new Asin({ node_ptr })); } },
-    { "atan", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Atan>(new Atan({ node_ptr })); } },
-    { "sqrt", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Sqrt>(new Sqrt({ node_ptr })); } },
-    { "abs", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Abs>(new Abs({ node_ptr })); } },
-    { "exp", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Exp>(new Exp({ node_ptr })); } },
-    { "log", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Log>(new Log({ node_ptr })); } },
-    { "det", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Determinant>(new Determinant({ node_ptr })); } },
-    { "inv", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<Inverse>(new Inverse({ node_ptr })); } }
+    { "cos", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<CosNode>(new CosNode({ node_ptr })); } },
+    { "sin", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<SinNode>(new SinNode({ node_ptr })); } },
+    { "tan", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<TanNode>(new TanNode({ node_ptr })); } },
+    { "acos", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<AcosNode>(new AcosNode({ node_ptr })); } },
+    { "asin", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<AsinNode>(new AsinNode({ node_ptr })); } },
+    { "atan", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<AtanNode>(new AtanNode({ node_ptr })); } },
+    { "sqrt", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<SqrtNode>(new SqrtNode({ node_ptr })); } },
+    { "abs", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<AbsNode>(new AbsNode({ node_ptr })); } },
+    { "exp", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<ExpNode>(new ExpNode({ node_ptr })); } },
+    { "log", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<LogNode>(new LogNode({ node_ptr })); } },
+    { "det", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<DeterminantNode>(new DeterminantNode({ node_ptr })); } },
+    { "inv", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<InverseNode>(new InverseNode({ node_ptr })); } }
 };
 
 ExpressionParser::ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map, std::shared_ptr<ExpressionParserContext> const &parser_context, bool const &clean_and_verify) : m_expression_str(expression_str), m_node_map(node_map), m_parser_context(parser_context)
@@ -117,7 +117,7 @@ std::string ExpressionParser::Matrices(std::string const &expression_str)
 
         std::string matrix_name = m_parser_context->NextMatrixName();
 
-        std::shared_ptr<Node> matrix_ptr(new Node(Matrix(rows, cols, flattened)));
+        std::shared_ptr<MatrixNode> matrix_ptr(new MatrixNode(Matrix(rows, cols, flattened)));
 
         m_node_map.emplace(matrix_name, matrix_ptr);
 
@@ -244,41 +244,41 @@ std::shared_ptr<Node> ExpressionParser::Operators(std::string const &expression_
             std::shared_ptr<Node> lhs_arg_ptr = Operators(operator_match[1].str());
             std::shared_ptr<Node> rhs_arg_ptr = Operators(operator_match[3].str());
 
-            return std::shared_ptr<Addition>(new Addition({ lhs_arg_ptr, rhs_arg_ptr }));
+            return std::shared_ptr<AdditionNode>(new AdditionNode({ lhs_arg_ptr, rhs_arg_ptr }));
         }
         else if (operator_match[2].str() == "-") {
             std::shared_ptr<Node> lhs_arg_ptr = Operators(operator_match[1].str());
             std::shared_ptr<Node> rhs_arg_ptr = Operators(operator_match[3].str());
 
-            return std::shared_ptr<Subtraction>(new Subtraction({ lhs_arg_ptr, rhs_arg_ptr }));
+            return std::shared_ptr<SubtractionNode>(new SubtractionNode({ lhs_arg_ptr, rhs_arg_ptr }));
         }
         else if (operator_match[5].str() == "*") {
             std::shared_ptr<Node> lhs_arg_ptr = Operators(operator_match[4].str());
             std::shared_ptr<Node> rhs_arg_ptr = Operators(operator_match[6].str());
 
-            return std::shared_ptr<Multiplication>(new Multiplication({ lhs_arg_ptr, rhs_arg_ptr }));
+            return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ lhs_arg_ptr, rhs_arg_ptr }));
         }
         else if (operator_match[5].str() == "/") {
             std::shared_ptr<Node> lhs_arg_ptr = Operators(operator_match[4].str());
             std::shared_ptr<Node> rhs_arg_ptr = Operators(operator_match[6].str());
 
-            return std::shared_ptr<Division>(new Division({ lhs_arg_ptr, rhs_arg_ptr }));
+            return std::shared_ptr<DivisionNode>(new DivisionNode({ lhs_arg_ptr, rhs_arg_ptr }));
         }
         else if (operator_match[8].str() == "^") {
             std::shared_ptr<Node> lhs_arg_ptr = Operators(operator_match[7].str());
             std::shared_ptr<Node> rhs_arg_ptr = Operators(operator_match[9].str());
 
-            return std::shared_ptr<Exponentiation>(new Exponentiation({ lhs_arg_ptr, rhs_arg_ptr }));
+            return std::shared_ptr<ExponentiationNode>(new ExponentiationNode({ lhs_arg_ptr, rhs_arg_ptr }));
         }
         else if (operator_match[10].str() == "+") {
             std::shared_ptr<Node> arg_ptr = Operators(operator_match[11].str());
 
-            return std::shared_ptr<Multiplication>(new Multiplication({ std::shared_ptr<Constant>(new Constant(1.0)), arg_ptr }));
+            return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ std::shared_ptr<ConstantNode>(new ConstantNode(1.0)), arg_ptr }));
         }
         else if (operator_match[10].str() == "-") {
             std::shared_ptr<Node> arg_ptr = Operators(operator_match[11].str());
 
-            return std::shared_ptr<Multiplication>(new Multiplication({ std::shared_ptr<Constant>(new Constant(-1.0)), arg_ptr }));
+            return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ std::shared_ptr<ConstantNode>(new ConstantNode(-1.0)), arg_ptr }));
         } 
     }
 
@@ -294,7 +294,7 @@ std::shared_ptr<Node> ExpressionParser::Nodes(std::string const &node_str)
 
         std::string constant_name = m_parser_context->NextConstantName();
         
-        std::shared_ptr<Constant> constant_ptr(new Constant(value));
+        std::shared_ptr<ConstantNode> constant_ptr(new ConstantNode(value));
 
         m_node_map.emplace(constant_name, constant_ptr);
 

@@ -9,9 +9,9 @@
 int main(int argc, char *argv[])
 {
     try {
-        std::shared_ptr<Variable> theta(new Variable(3.14159 / 4.0));
-        std::shared_ptr<Constant> x(new Constant(1.0));
-        std::shared_ptr<Constant> y(new Constant(3.0));
+        std::shared_ptr<VariableNode> theta(new VariableNode(3.14159 / 4.0));
+        std::shared_ptr<ConstantNode> x(new ConstantNode(1.0));
+        std::shared_ptr<ConstantNode> y(new ConstantNode(3.0));
 
         std::map<std::string, std::shared_ptr<Node>> node_map = { { "theta", theta }, { "x", x }, { "y", y } };
 

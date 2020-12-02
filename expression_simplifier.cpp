@@ -8,11 +8,6 @@ ExpressionSimplifier::ExpressionSimplifier(std::shared_ptr<Node> const &node_ptr
 {
 }
 
-std::shared_ptr<Node> ExpressionSimplifier::Simplify()
-{
-    return Identify(CombineAddends(Identify(CombineFactors(Identify(Distribute(Identify(m_node_ptr)))))));
-}
-
 std::shared_ptr<Node> ExpressionSimplifier::Identify()
 {
     return Identify(m_node_ptr);
@@ -24,142 +19,142 @@ std::shared_ptr<Node> ExpressionSimplifier::Identify(std::shared_ptr<Node> const
         argument = Identify(argument);
     }
 
-    if (node_ptr->Type() == "Exponentiation") {
-        if (node_ptr->Argument(1)->Type() == "Constant") {
-            if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(1)->Value()), 0.0)) {
-                return std::shared_ptr<Constant>(new Constant(1.0));
+    if (node_ptr->Type() == "ExponentiationNode") {
+        if (node_ptr->Argument(1)->Type() == "ConstantNode") {
+            if (Approximately(node_ptr->Argument(1)->ComplexValue(), 0.0)) {
+                return std::shared_ptr<ConstantNode>(new ConstantNode(1.0));
             }
-            else if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(1)->Value()), 1.0)) {
+            else if (Approximately(node_ptr->Argument(1)->ComplexValue(), 1.0)) {
                 return node_ptr->Argument(0);
             }
-            else if (node_ptr->Argument(0)->Type() == "Constant") {
-                return std::shared_ptr<Constant>(new Constant(std::pow(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()), std::get<std::complex<double>>(node_ptr->Argument(1)->Value()))));
+            else if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+                return std::shared_ptr<ConstantNode>(new ConstantNode(std::pow(node_ptr->Argument(0)->ComplexValue(), node_ptr->Argument(1)->ComplexValue())));
             }
         }
     }
-    else if (node_ptr->Type() == "Multiplication") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()), 0.0)) {
-                return std::shared_ptr<Constant>(new Constant(0.0));
+    else if (node_ptr->Type() == "MultiplicationNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            if (Approximately(node_ptr->Argument(0)->ComplexValue(), 0.0)) {
+                return std::shared_ptr<ConstantNode>(new ConstantNode(0.0));
             }
-            else if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()), 1.0)) {
+            else if (Approximately(node_ptr->Argument(0)->ComplexValue(), 1.0)) {
                 return node_ptr->Argument(1);
             }
-            else if (node_ptr->Argument(1)->Type() == "Constant") {
-                return std::shared_ptr<Constant>(new Constant(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()) * std::get<std::complex<double>>(node_ptr->Argument(1)->Value())));
+            else if (node_ptr->Argument(1)->Type() == "ConstantNode") {
+                return std::shared_ptr<ConstantNode>(new ConstantNode(node_ptr->Argument(0)->ComplexValue() * node_ptr->Argument(1)->ComplexValue()));
             }
         }
-        else if (node_ptr->Argument(1)->Type() == "Constant") {
-            if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(1)->Value()), 0.0)) {
-                return std::shared_ptr<Constant>(new Constant(0.0));
+        else if (node_ptr->Argument(1)->Type() == "ConstantNode") {
+            if (Approximately(node_ptr->Argument(1)->ComplexValue(), 0.0)) {
+                return std::shared_ptr<ConstantNode>(new ConstantNode(0.0));
             }
-            else if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(1)->Value()), 1.0)) {
+            else if (Approximately(node_ptr->Argument(1)->ComplexValue(), 1.0)) {
                 return node_ptr->Argument(0);
             }
         }
     }
-    else if (node_ptr->Type() == "Division") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()), 0.0)) {
-                return std::shared_ptr<Constant>(new Constant(0.0));
+    else if (node_ptr->Type() == "DivisionNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            if (Approximately(node_ptr->Argument(0)->ComplexValue(), 0.0)) {
+                return std::shared_ptr<ConstantNode>(new ConstantNode(0.0));
             }
-            else if (node_ptr->Argument(1)->Type() == "Constant") {
-                return std::shared_ptr<Constant>(new Constant(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()) / std::get<std::complex<double>>(node_ptr->Argument(1)->Value())));
+            else if (node_ptr->Argument(1)->Type() == "ConstantNode") {
+                return std::shared_ptr<ConstantNode>(new ConstantNode(node_ptr->Argument(0)->ComplexValue() / node_ptr->Argument(1)->ComplexValue()));
             }
         }
-        else if (node_ptr->Argument(1)->Type() == "Constant") {
-            if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(1)->Value()), 1.0)) {
+        else if (node_ptr->Argument(1)->Type() == "ConstantNode") {
+            if (Approximately(node_ptr->Argument(1)->ComplexValue(), 1.0)) {
                 return node_ptr->Argument(0);
             }
         }
 
-        if (node_ptr->Argument(1)->Type() == "Exponentiation") {
-            if (node_ptr->Argument(1)->Argument(1)->Type() == "Constant") {
-                return std::shared_ptr<Multiplication>(new Multiplication({ node_ptr->Argument(0), std::shared_ptr<Exponentiation>(new Exponentiation({ node_ptr->Argument(1)->Argument(0), std::shared_ptr<Constant>(new Constant(-1.0 * std::get<std::complex<double>>(node_ptr->Argument(1)->Argument(1)->Value()))) })) }));
+        if (node_ptr->Argument(1)->Type() == "ExponentiationNode") {
+            if (node_ptr->Argument(1)->Argument(1)->Type() == "ConstantNode") {
+                return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ node_ptr->Argument(0), std::shared_ptr<ExponentiationNode>(new ExponentiationNode({ node_ptr->Argument(1)->Argument(0), std::shared_ptr<ConstantNode>(new ConstantNode(-1.0 * node_ptr->Argument(1)->Argument(1)->ComplexValue())) })) }));
             }
         }
     }
-    else if (node_ptr->Type() == "Addition") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()), 0.0)) {
+    else if (node_ptr->Type() == "AdditionNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            if (Approximately(node_ptr->Argument(0)->ComplexValue(), 0.0)) {
                 return node_ptr->Argument(1);
             }
-            else if (node_ptr->Argument(1)->Type() == "Constant") {
-                return std::shared_ptr<Constant>(new Constant(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()) + std::get<std::complex<double>>(node_ptr->Argument(1)->Value())));
+            else if (node_ptr->Argument(1)->Type() == "ConstantNode") {
+                return std::shared_ptr<ConstantNode>(new ConstantNode(node_ptr->Argument(0)->ComplexValue() + node_ptr->Argument(1)->ComplexValue()));
             }
         }
-        else if (node_ptr->Argument(1)->Type() == "Constant") {
-            if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(1)->Value()), 0.0)) {
+        else if (node_ptr->Argument(1)->Type() == "ConstantNode") {
+            if (Approximately(node_ptr->Argument(1)->ComplexValue(), 0.0)) {
                 return node_ptr->Argument(0);
             }
         }
     }
-    else if (node_ptr->Type() == "Subtraction") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()), 0.0)) {
-                return std::shared_ptr<Multiplication>(new Multiplication({ std::shared_ptr<Constant>(new Constant(-1.0)), node_ptr->Argument(1) }));
+    else if (node_ptr->Type() == "SubtractionNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            if (Approximately(node_ptr->Argument(0)->ComplexValue(), 0.0)) {
+                return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ std::shared_ptr<ConstantNode>(new ConstantNode(-1.0)), node_ptr->Argument(1) }));
             }
-            else if (node_ptr->Argument(1)->Type() == "Constant") {
-                return std::shared_ptr<Constant>(new Constant(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()) - std::get<std::complex<double>>(node_ptr->Argument(1)->Value())));
+            else if (node_ptr->Argument(1)->Type() == "ConstantNode") {
+                return std::shared_ptr<ConstantNode>(new ConstantNode(node_ptr->Argument(0)->ComplexValue() - node_ptr->Argument(1)->ComplexValue()));
             }
         }
-        else if (node_ptr->Argument(1)->Type() == "Constant") {
-            if (Approximately(std::get<std::complex<double>>(node_ptr->Argument(1)->Value()), 0.0)) {
+        else if (node_ptr->Argument(1)->Type() == "ConstantNode") {
+            if (Approximately(node_ptr->Argument(1)->ComplexValue(), 0.0)) {
                 return node_ptr->Argument(0);
             }
         }
         else {
-            return std::shared_ptr<Addition>(new Addition({ node_ptr->Argument(0), std::shared_ptr<Multiplication>(new Multiplication({ std::shared_ptr<Constant>(new Constant(-1.0)), node_ptr->Argument(1) })) }));
+            return std::shared_ptr<AdditionNode>(new AdditionNode({ node_ptr->Argument(0), std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ std::shared_ptr<ConstantNode>(new ConstantNode(-1.0)), node_ptr->Argument(1) })) }));
         }
     }
-    else if (node_ptr->Type() == "Sin") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::sin(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()))));
+    else if (node_ptr->Type() == "SinNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            return std::shared_ptr<ConstantNode>(new ConstantNode(std::sin(node_ptr->Argument(0)->ComplexValue())));
         }
     }
-    else if (node_ptr->Type() == "Cos") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::cos(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()))));
+    else if (node_ptr->Type() == "CosNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            return std::shared_ptr<ConstantNode>(new ConstantNode(std::cos(node_ptr->Argument(0)->ComplexValue())));
         }
     }
-    else if (node_ptr->Type() == "Tan") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::tan(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()))));
+    else if (node_ptr->Type() == "TanNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            return std::shared_ptr<ConstantNode>(new ConstantNode(std::tan(node_ptr->Argument(0)->ComplexValue())));
         }
     }
-    else if (node_ptr->Type() == "Asin") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::asin(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()))));
+    else if (node_ptr->Type() == "AsinNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            return std::shared_ptr<ConstantNode>(new ConstantNode(std::asin(node_ptr->Argument(0)->ComplexValue())));
         }
     }
-    else if (node_ptr->Type() == "Acos") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::acos(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()))));
+    else if (node_ptr->Type() == "AcosNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            return std::shared_ptr<ConstantNode>(new ConstantNode(std::acos(node_ptr->Argument(0)->ComplexValue())));
         }
     }
-    else if (node_ptr->Type() == "Atan") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::atan(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()))));
+    else if (node_ptr->Type() == "AtanNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            return std::shared_ptr<ConstantNode>(new ConstantNode(std::atan(node_ptr->Argument(0)->ComplexValue())));
         }
     }
-    else if (node_ptr->Type() == "Sqrt") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::sqrt(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()))));
+    else if (node_ptr->Type() == "SqrtNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            return std::shared_ptr<ConstantNode>(new ConstantNode(std::sqrt(node_ptr->Argument(0)->ComplexValue())));
         }
     }
-    else if (node_ptr->Type() == "Abs") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::abs(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()))));
+    else if (node_ptr->Type() == "AbsNode") {
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            return std::shared_ptr<ConstantNode>(new ConstantNode(std::abs(node_ptr->Argument(0)->ComplexValue())));
         }
     }
     else if (node_ptr->Type() == "Exp") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::exp(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()))));
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            return std::shared_ptr<ConstantNode>(new ConstantNode(std::exp(node_ptr->Argument(0)->ComplexValue())));
         }
     }
     else if (node_ptr->Type() == "Log") {
-        if (node_ptr->Argument(0)->Type() == "Constant") {
-            return std::shared_ptr<Constant>(new Constant(std::log(std::get<std::complex<double>>(node_ptr->Argument(0)->Value()))));
+        if (node_ptr->Argument(0)->Type() == "ConstantNode") {
+            return std::shared_ptr<ConstantNode>(new ConstantNode(std::log(node_ptr->Argument(0)->ComplexValue())));
         }
     }
 
@@ -185,14 +180,17 @@ std::shared_ptr<Node> ExpressionSimplifier::Distribute(std::shared_ptr<Node> con
         for (std::shared_ptr<Node> const &factor : std::vector<std::shared_ptr<Node>>(std::next(std::cbegin(factors)), std::cend(factors))) {
             std::vector<std::shared_ptr<Node>> lhs_addends = Addends(distributed_ptr);
             std::vector<std::shared_ptr<Node>> rhs_addends = Addends(factor);       
-                    
-            distributed_ptr = std::shared_ptr<Constant>(new Constant(0.0));
 
-            for (std::shared_ptr<Node> const &lhs_summand_ptr : lhs_addends) {
-                for (std::shared_ptr<Node> const &rhs_summand_ptr : rhs_addends) {
-                    std::shared_ptr<Multiplication> multiplication_ptr(new Multiplication({ lhs_summand_ptr, rhs_summand_ptr }));
+            for (auto lhs_addend_it = std::cbegin(lhs_addends); lhs_addend_it != std::cend(lhs_addends); ++lhs_addend_it) {
+                for (auto rhs_addend_it = std::cbegin(rhs_addends); rhs_addend_it != std::cend(rhs_addends); ++rhs_addend_it) {
+                    std::shared_ptr<MultiplicationNode> multiplication_ptr(new MultiplicationNode({ *lhs_addend_it, *rhs_addend_it }));
 
-                    distributed_ptr = std::shared_ptr<Addition>(new Addition({ distributed_ptr, multiplication_ptr }));
+                    if (lhs_addend_it == std::cbegin(lhs_addends) && rhs_addend_it == std::cbegin(rhs_addends)) {
+                        distributed_ptr = multiplication_ptr;
+                    }
+                    else {
+                        distributed_ptr = std::shared_ptr<AdditionNode>(new AdditionNode({ distributed_ptr, multiplication_ptr }));
+                    }
                 }
             }
         }
@@ -221,7 +219,7 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
         std::vector<std::shared_ptr<Node>> variables;
 
         // Separate the factors into their coefficients and their variables
-        std::partition_copy(std::cbegin(factors), std::cend(factors), std::back_inserter(coefficients), std::back_inserter(variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "Constant"; });
+        std::partition_copy(std::cbegin(factors), std::cend(factors), std::back_inserter(coefficients), std::back_inserter(variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "ConstantNode"; });
 
         if (!variables.empty()) {
             // Assess factors with O(n*(n-1)/2) complexity
@@ -231,15 +229,15 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
                     std::shared_ptr<Node> rhs_variable;
                     
                     // Extract the variable of interest; 
-                    // if the node is of type "Exponentiation" we want Argument(0) 
-                    if ((*lhs_variable_it)->Type() == "Exponentiation") {
+                    // if the node is of type "ExponentiationNode" we want Argument(0) 
+                    if ((*lhs_variable_it)->Type() == "ExponentiationNode") {
                         lhs_variable = (*lhs_variable_it)->Argument(0);
                     }
                     else {
                         lhs_variable = (*lhs_variable_it);
                     }
                     
-                    if ((*rhs_variable_it)->Type() == "Exponentiation") {
+                    if ((*rhs_variable_it)->Type() == "ExponentiationNode") {
                         rhs_variable = (*rhs_variable_it)->Argument(0);
                     }
                     else {
@@ -251,24 +249,24 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
                         std::shared_ptr<Node> lhs_degree;
                         std::shared_ptr<Node> rhs_degree;
                         
-                        // If the variable is of type "Exponentiation" then our degree is Argument(1)
+                        // If the variable is of type "ExponentiationNode" then our degree is Argument(1)
                         // otherwise we have an implied degree of 1
-                        if ((*lhs_variable_it)->Type() == "Exponentiation") {
+                        if ((*lhs_variable_it)->Type() == "ExponentiationNode") {
                             lhs_degree = (*lhs_variable_it)->Argument(1);
                         }
                         else {
-                            lhs_degree = std::shared_ptr<Constant>(new Constant(1.0));
+                            lhs_degree = std::shared_ptr<ConstantNode>(new ConstantNode(1.0));
                         }
                         
-                        if ((*rhs_variable_it)->Type() == "Exponentiation") {
+                        if ((*rhs_variable_it)->Type() == "ExponentiationNode") {
                             rhs_degree = (*rhs_variable_it)->Argument(1);
                         }
                         else {
-                            rhs_degree = std::shared_ptr<Constant>(new Constant(1.0));
+                            rhs_degree = std::shared_ptr<ConstantNode>(new ConstantNode(1.0));
                         }
 
                         // Add their degrees and exponentiate
-                        *lhs_variable_it = std::shared_ptr<Exponentiation>(new Exponentiation({ lhs_variable, std::shared_ptr<Addition>(new Addition({ lhs_degree, rhs_degree })) }));
+                        *lhs_variable_it = std::shared_ptr<ExponentiationNode>(new ExponentiationNode({ lhs_variable, std::shared_ptr<AdditionNode>(new AdditionNode({ lhs_degree, rhs_degree })) }));
 
                         // Remove the old variable
                         rhs_variable_it = variables.erase(rhs_variable_it);
@@ -280,14 +278,22 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
                 }
             }
 
-            // Reduce the factors to a single combined node via repeated Multiplication nodes
-            std::shared_ptr<Node> combined_factors = std::reduce(std::next(std::cbegin(variables)), std::cend(variables), variables.front(), [](std::shared_ptr<Node> const &combined_factors, std::shared_ptr<Node> const &combined_factor) { return std::shared_ptr<Multiplication>(new Multiplication({ combined_factors, combined_factor })); });
+            // Reduce the factors to a single combined node via repeated MultiplicationNode nodes
+            std::shared_ptr<Node> combined_factors = std::reduce(std::next(std::cbegin(variables)), std::cend(variables), variables.front(), 
+                [](std::shared_ptr<Node> const &combined_factors, std::shared_ptr<Node> const &combined_factor) { 
+                    return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ combined_factors, combined_factor })); 
+                });
             
             // Reduce the coefficients to a single value via repeated multiplication
             if (!coefficients.empty()) {
-                std::complex<double> coefficient = std::transform_reduce(std::cbegin(coefficients), std::cend(coefficients), std::complex<double>(1.0, 0.0), [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { return product_coefficient * coefficient; }, [](std::shared_ptr<Node> const &coefficient) -> std::complex<double> { return std::get<std::complex<double>>(coefficient->Value()); });
+                std::complex<double> coefficient = std::transform_reduce(std::cbegin(coefficients), std::cend(coefficients), std::complex<double>(1.0, 0.0), 
+                    [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { 
+                        return product_coefficient * coefficient; 
+                    }, [](std::shared_ptr<Node> const &coefficient) -> std::complex<double> { 
+                        return coefficient->ComplexValue(); 
+                    });
 
-                return std::shared_ptr<Multiplication>(new Multiplication({ std::shared_ptr<Constant>(new Constant(coefficient)), combined_factors}));
+                return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ std::shared_ptr<ConstantNode>(new ConstantNode(coefficient)), combined_factors}));
             }
             else {
                 return combined_factors;
@@ -325,8 +331,8 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                 std::vector<std::shared_ptr<Node>> lhs_variables;
                 std::vector<std::shared_ptr<Node>> rhs_variables;
 
-                std::partition_copy(std::cbegin(lhs_factors), std::cend(lhs_factors), std::back_inserter(lhs_coefficients), std::back_inserter(lhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "Constant"; });
-                std::partition_copy(std::cbegin(rhs_factors), std::cend(rhs_factors), std::back_inserter(rhs_coefficients), std::back_inserter(rhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "Constant"; });
+                std::partition_copy(std::cbegin(lhs_factors), std::cend(lhs_factors), std::back_inserter(lhs_coefficients), std::back_inserter(lhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "ConstantNode"; });
+                std::partition_copy(std::cbegin(rhs_factors), std::cend(rhs_factors), std::back_inserter(rhs_coefficients), std::back_inserter(rhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "ConstantNode"; });
 
                 // Check if all of the variables are equivalent
                 bool all_of = true;
@@ -343,21 +349,34 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                         coefficient += std::complex<double>(1.0, 0.0);
                     }
                     else {
-                        coefficient += std::transform_reduce(std::cbegin(lhs_coefficients), std::cend(lhs_coefficients), std::complex<double>(1.0, 0.0), [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { return product_coefficient * coefficient; }, [](std::shared_ptr<Node> const &lhs_coefficient) -> std::complex<double> { return std::get<std::complex<double>>(lhs_coefficient->Value()); });
+                        coefficient += std::transform_reduce(std::cbegin(lhs_coefficients), std::cend(lhs_coefficients), std::complex<double>(1.0, 0.0), 
+                            [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { 
+                                return product_coefficient * coefficient; 
+                            }, [](std::shared_ptr<Node> const &lhs_coefficient) -> std::complex<double> { 
+                                return lhs_coefficient->ComplexValue(); 
+                            });
                     }
 
                     if (rhs_coefficients.empty()) {
                         coefficient += std::complex<double>(1.0, 0.0);
                     }
                     else {
-                        coefficient += std::transform_reduce(std::cbegin(rhs_coefficients), std::cend(rhs_coefficients), std::complex<double>(1.0, 0.0), [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { return product_coefficient * coefficient; }, [](std::shared_ptr<Node> const &rhs_coefficient) -> std::complex<double> { return std::get<std::complex<double>>(rhs_coefficient->Value()); });
+                        coefficient += std::transform_reduce(std::cbegin(rhs_coefficients), std::cend(rhs_coefficients), std::complex<double>(1.0, 0.0), 
+                            [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { 
+                                return product_coefficient * coefficient; 
+                            }, [](std::shared_ptr<Node> const &rhs_coefficient) -> std::complex<double> { 
+                                return rhs_coefficient->ComplexValue(); 
+                            });
                     }
 
-                    // Recombining the variables via repeated Multiplication
-                    std::shared_ptr<Node> combined_variables = std::reduce(std::next(std::cbegin(lhs_variables)), std::cend(lhs_variables), lhs_variables.front(), [](std::shared_ptr<Node> const &combined_variables, std::shared_ptr<Node> const &combined_variable) -> std::shared_ptr<Node> { return std::shared_ptr<Multiplication>(new Multiplication({ combined_variables, combined_variable })); });
+                    // Recombining the variables via repeated MultiplicationNode
+                    std::shared_ptr<Node> combined_variables = std::reduce(std::next(std::cbegin(lhs_variables)), std::cend(lhs_variables), lhs_variables.front(), 
+                        [](std::shared_ptr<Node> const &combined_variables, std::shared_ptr<Node> const &combined_variable) -> std::shared_ptr<Node> { 
+                            return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ combined_variables, combined_variable })); 
+                        });
 
                     // Multiply by the coefficient
-                    *addend_lhs_it = std::shared_ptr<Multiplication>(new Multiplication({ std::shared_ptr<Constant>(new Constant(coefficient)), combined_variables }));
+                    *addend_lhs_it = std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ std::shared_ptr<ConstantNode>(new ConstantNode(coefficient)), combined_variables }));
 
                     // Remove the old term
                     addend_rhs_it = addends.erase(addend_rhs_it);
@@ -370,7 +389,10 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
         }
 
         // Sum the addends for the final result
-        std::shared_ptr<Node> combined_addends = std::reduce(std::next(std::cbegin(addends)), std::cend(addends), addends.front(), [](std::shared_ptr<Node> const &combined_addends, std::shared_ptr<Node> const &combined_addend) { return std::shared_ptr<Addition>(new Addition({ combined_addends, combined_addend })); });
+        std::shared_ptr<Node> combined_addends = std::reduce(std::next(std::cbegin(addends)), std::cend(addends), addends.front(), 
+            [](std::shared_ptr<Node> const &combined_addends, std::shared_ptr<Node> const &combined_addend) { 
+                return std::shared_ptr<AdditionNode>(new AdditionNode({ combined_addends, combined_addend })); 
+            });
 
         return combined_addends;
     }
@@ -389,7 +411,7 @@ std::vector<std::shared_ptr<Node>> ExpressionSimplifier::Factors(std::shared_ptr
 
 void ExpressionSimplifier::Factors(std::vector<std::shared_ptr<Node>> &factors, std::shared_ptr<Node> const &node_ptr)
 {
-    if (node_ptr->Type() == "Multiplication") {
+    if (node_ptr->Type() == "MultiplicationNode") {
         Factors(factors, node_ptr->Argument(0));
         Factors(factors, node_ptr->Argument(1));
     }
@@ -409,7 +431,7 @@ std::vector<std::shared_ptr<Node>> ExpressionSimplifier::Addends(std::shared_ptr
 
 void ExpressionSimplifier::Addends(std::vector<std::shared_ptr<Node>> &addends, std::shared_ptr<Node> const &node_ptr)
 {
-    if (node_ptr->Type() == "Addition") {
+    if (node_ptr->Type() == "AdditionNode") {
         Addends(addends, node_ptr->Argument(0));
         Addends(addends, node_ptr->Argument(1));
     }

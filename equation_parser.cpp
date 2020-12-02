@@ -23,5 +23,5 @@ EquationParser::EquationParser(std::string const &equation_str, std::map<std::st
 
 bool EquationParser::Equal() const
 {
-    return Approximately(std::get<std::complex<double>>(m_lhs_ptr->Value()), std::get<std::complex<double>>(m_rhs_ptr->Value()));
+    return Approximately(m_lhs_ptr->ComplexValue(), m_rhs_ptr->ComplexValue());
 }

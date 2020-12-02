@@ -4,87 +4,87 @@
 
 #include "operations.hpp"
 
-Exponentiation::Exponentiation(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
+ExponentiationNode::ExponentiationNode(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
     if (arguments.size() != 2) {
-        throw std::invalid_argument("Exponentiation accepts only 2 arguments");
+        throw std::invalid_argument("ExponentiationNode accepts only 2 arguments");
     }
 }
 
-std::string Exponentiation::Type() const
+std::string ExponentiationNode::Type() const
 {
-    return "Exponentiation";
+    return "ExponentiationNode";
 }
 
-std::variant<Matrix, std::complex<double>> Exponentiation::Value() const
+std::variant<Matrix, std::complex<double>> ExponentiationNode::Value() const
 {
-    return std::visit(Visitor{}, m_arguments[0]->Value(), m_arguments[1]->Value());
+    return std::visit(Visitor{}, Argument(0)->Value(), Argument(1)->Value());
 }
 
-Multiplication::Multiplication(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
+MultiplicationNode::MultiplicationNode(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
     if (arguments.size() != 2) {
-        throw std::invalid_argument("Multiplication accepts only 2 arguments");
+        throw std::invalid_argument("MultiplicationNode accepts only 2 arguments");
     }
 }
 
-std::string Multiplication::Type() const
+std::string MultiplicationNode::Type() const
 {
-    return "Multiplication";
+    return "MultiplicationNode";
 }
 
-std::variant<Matrix, std::complex<double>> Multiplication::Value() const
+std::variant<Matrix, std::complex<double>> MultiplicationNode::Value() const
 {
-    return std::visit(Visitor{}, m_arguments[0]->Value(), m_arguments[1]->Value());
+    return std::visit(Visitor{}, Argument(0)->Value(), Argument(1)->Value());
 }
 
-Division::Division(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
+DivisionNode::DivisionNode(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
     if (arguments.size() != 2) {
-        throw std::invalid_argument("Division accepts only 2 arguments");
+        throw std::invalid_argument("DivisionNode accepts only 2 arguments");
     }
 }
 
-std::string Division::Type() const
+std::string DivisionNode::Type() const
 {
-    return "Division";
+    return "DivisionNode";
 }
 
-std::variant<Matrix, std::complex<double>> Division::Value() const
+std::variant<Matrix, std::complex<double>> DivisionNode::Value() const
 {
-    return std::visit(Visitor{}, m_arguments[0]->Value(), m_arguments[1]->Value());
+    return std::visit(Visitor{}, Argument(0)->Value(), Argument(1)->Value());
 }
 
-Addition::Addition(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
+AdditionNode::AdditionNode(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
     if (arguments.size() != 2) {
-        throw std::invalid_argument("Addition accepts only 2 arguments");
+        throw std::invalid_argument("AdditionNode accepts only 2 arguments");
     }
 }
 
-std::string Addition::Type() const
+std::string AdditionNode::Type() const
 {
-    return "Addition";
+    return "AdditionNode";
 }
 
-std::variant<Matrix, std::complex<double>> Addition::Value() const
+std::variant<Matrix, std::complex<double>> AdditionNode::Value() const
 {
-    return std::visit(Visitor{}, m_arguments[0]->Value(), m_arguments[1]->Value());
+    return std::visit(Visitor{}, Argument(0)->Value(), Argument(1)->Value());
 }
 
-Subtraction::Subtraction(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
+SubtractionNode::SubtractionNode(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
     if (arguments.size() != 2) {
-        throw std::invalid_argument("Subtraction accepts only 2 arguments");
+        throw std::invalid_argument("SubtractionNode accepts only 2 arguments");
     }
 }
 
-std::string Subtraction::Type() const
+std::string SubtractionNode::Type() const
 {
-    return "Subtraction";
+    return "SubtractionNode";
 }
 
-std::variant<Matrix, std::complex<double>> Subtraction::Value() const
+std::variant<Matrix, std::complex<double>> SubtractionNode::Value() const
 {
-    return std::visit(Visitor{}, m_arguments[0]->Value(), m_arguments[1]->Value());
+    return std::visit(Visitor{}, Argument(0)->Value(), Argument(1)->Value());
 }
