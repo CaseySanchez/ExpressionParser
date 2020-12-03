@@ -20,4 +20,5 @@ To run the examples:
 ```
 cd Examples/MatrixExample && ./MatrixExample
 cd Examples/GaussianExample && ./GaussianExample
+cd Examples/SimplifyExample && ./SimplifyExample
 ```
