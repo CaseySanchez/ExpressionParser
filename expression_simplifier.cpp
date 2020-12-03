@@ -254,11 +254,11 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
     std::vector<std::shared_ptr<Node>> factors = Factors(node_ptr);
 
     if (factors.size() > 0) {
-        std::vector<std::shared_ptr<Node>> coefficients;
+        std::vector<std::shared_ptr<Node>> constants;
         std::vector<std::shared_ptr<Node>> variables;
 
-        // Separate the factors into their coefficients and their variables
-        std::partition_copy(std::cbegin(factors), std::cend(factors), std::back_inserter(coefficients), std::back_inserter(variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "ConstantNode"; });
+        // Separate the factors into their constants and their variables
+        std::partition_copy(std::cbegin(factors), std::cend(factors), std::back_inserter(constants), std::back_inserter(variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "ConstantNode"; });
 
         if (!variables.empty()) {
             // Assess factors with O(n*(n-1)/2) complexity
@@ -323,9 +323,9 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
                     return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ combined_factors, combined_factor })); 
                 });
             
-            // Reduce the coefficients to a single value via repeated multiplication
-            if (!coefficients.empty()) {
-                std::complex<double> coefficient = std::transform_reduce(std::cbegin(coefficients), std::cend(coefficients), std::complex<double>(1.0, 0.0), 
+            // Reduce the constants to a single value via repeated multiplication
+            if (!constants.empty()) {
+                std::complex<double> coefficient = std::transform_reduce(std::cbegin(constants), std::cend(constants), std::complex<double>(1.0, 0.0), 
                     [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { 
                         return product_coefficient * coefficient; 
                     }, [](std::shared_ptr<Node> const &coefficient) -> std::complex<double> { 
@@ -377,66 +377,92 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                 auto lhs_factors = Factors(*addend_lhs_it);
                 auto rhs_factors = Factors(*addend_rhs_it);
 
-                // Separate the factors into their coefficients and their variables
-                std::vector<std::shared_ptr<Node>> lhs_coefficients;
-                std::vector<std::shared_ptr<Node>> rhs_coefficients;
+                // Separate the factors into their constants and their variables
+                std::vector<std::shared_ptr<Node>> lhs_constants;
+                std::vector<std::shared_ptr<Node>> rhs_constants;
+
                 std::vector<std::shared_ptr<Node>> lhs_variables;
                 std::vector<std::shared_ptr<Node>> rhs_variables;
 
-                std::partition_copy(std::cbegin(lhs_factors), std::cend(lhs_factors), std::back_inserter(lhs_coefficients), std::back_inserter(lhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "ConstantNode"; });
-                std::partition_copy(std::cbegin(rhs_factors), std::cend(rhs_factors), std::back_inserter(rhs_coefficients), std::back_inserter(rhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "ConstantNode"; });
+                std::partition_copy(std::cbegin(lhs_factors), std::cend(lhs_factors), std::back_inserter(lhs_constants), std::back_inserter(lhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "ConstantNode"; });
+                std::partition_copy(std::cbegin(rhs_factors), std::cend(rhs_factors), std::back_inserter(rhs_constants), std::back_inserter(rhs_variables), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "ConstantNode"; });
 
-                // Check if all of the variables are equivalent
-                bool all_of = true;
+                if (lhs_variables.size() > 0 && rhs_variables.size() > 0 && lhs_variables.size() == rhs_variables.size()) {
+                    // Check if all of the variables are equivalent
+                    bool all_of = true;
 
-                for (auto lhs_variable : lhs_variables) {
-                    all_of = all_of && std::find_if(std::cbegin(rhs_variables), std::cend(rhs_variables), [&lhs_variable](std::shared_ptr<Node> const &rhs_variable) -> bool { return Node::Equivalent(lhs_variable, rhs_variable); }) != std::cend(rhs_variables);
+                    for (auto lhs_variable : lhs_variables) {
+                        all_of = all_of && std::find_if(std::cbegin(rhs_variables), std::cend(rhs_variables), [&lhs_variable](std::shared_ptr<Node> const &rhs_variable) -> bool { return Node::Equivalent(lhs_variable, rhs_variable); }) != std::cend(rhs_variables);
+                    }
+
+                    if (all_of) {
+                        // If there are multiple constants per term, multiply them together and increment the coefficient                    
+                        std::complex<double> coefficient;
+                        
+                        if (lhs_constants.empty()) {
+                            coefficient += std::complex<double>(1.0, 0.0);
+                        }
+                        else {
+                            coefficient += std::transform_reduce(std::cbegin(lhs_constants), std::cend(lhs_constants), std::complex<double>(1.0, 0.0), 
+                                [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { 
+                                    return product_coefficient * coefficient; 
+                                }, [](std::shared_ptr<Node> const &lhs_coefficient) -> std::complex<double> { 
+                                    return lhs_coefficient->ComplexValue(); 
+                                });
+                        }
+
+                        if (rhs_constants.empty()) {
+                            coefficient += std::complex<double>(1.0, 0.0);
+                        }
+                        else {
+                            coefficient += std::transform_reduce(std::cbegin(rhs_constants), std::cend(rhs_constants), std::complex<double>(1.0, 0.0), 
+                                [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { 
+                                    return product_coefficient * coefficient; 
+                                }, [](std::shared_ptr<Node> const &rhs_coefficient) -> std::complex<double> { 
+                                    return rhs_coefficient->ComplexValue(); 
+                                });
+                        }
+
+                        // Recombining the variables via repeated MultiplicationNode
+                        std::shared_ptr<Node> combined_variables = std::reduce(std::next(std::cbegin(lhs_variables)), std::cend(lhs_variables), lhs_variables.front(), 
+                            [](std::shared_ptr<Node> const &combined_variables, std::shared_ptr<Node> const &combined_variable) -> std::shared_ptr<Node> { 
+                                return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ combined_variables, combined_variable })); 
+                            });
+
+                        // Multiply by the coefficient
+                        *addend_lhs_it = std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ std::shared_ptr<ConstantNode>(new ConstantNode(coefficient)), combined_variables }));
+
+                        // Remove the old term
+                        addend_rhs_it = addends.erase(addend_rhs_it);
+
+                        // Make sure we don't segfault by attempting to access out-of-bounds memory!
+                        if (addend_rhs_it == std::end(addends)) {
+                            break;
+                        }
+                    }
                 }
-
-                if (all_of) {
-                    // If there are multiple coefficients per term, multiply them together and increment the coefficient                    
-                    std::complex<double> coefficient;
+                /*else if (lhs_constants.size() > 0 && rhs_constants.size() > 0 && lhs_constants.size() == rhs_constants.size()) {
+                    std::complex<double> combined_constants;
                     
-                    if (lhs_coefficients.empty()) {
-                        coefficient += std::complex<double>(1.0, 0.0);
-                    }
-                    else {
-                        coefficient += std::transform_reduce(std::cbegin(lhs_coefficients), std::cend(lhs_coefficients), std::complex<double>(1.0, 0.0), 
-                            [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { 
-                                return product_coefficient * coefficient; 
-                            }, [](std::shared_ptr<Node> const &lhs_coefficient) -> std::complex<double> { 
-                                return lhs_coefficient->ComplexValue(); 
-                            });
+                    for (auto lhs_constant : lhs_constants) {
+                        combined_constants += lhs_constant->ComplexValue();
                     }
 
-                    if (rhs_coefficients.empty()) {
-                        coefficient += std::complex<double>(1.0, 0.0);
+                    for (auto rhs_constant : rhs_constants) {
+                        combined_constants += rhs_constant->ComplexValue();
                     }
-                    else {
-                        coefficient += std::transform_reduce(std::cbegin(rhs_coefficients), std::cend(rhs_coefficients), std::complex<double>(1.0, 0.0), 
-                            [](std::complex<double> const &product_coefficient, std::complex<double> const &coefficient) -> std::complex<double> { 
-                                return product_coefficient * coefficient; 
-                            }, [](std::shared_ptr<Node> const &rhs_coefficient) -> std::complex<double> { 
-                                return rhs_coefficient->ComplexValue(); 
-                            });
-                    }
-
-                    // Recombining the variables via repeated MultiplicationNode
-                    std::shared_ptr<Node> combined_variables = std::reduce(std::next(std::cbegin(lhs_variables)), std::cend(lhs_variables), lhs_variables.front(), 
-                        [](std::shared_ptr<Node> const &combined_variables, std::shared_ptr<Node> const &combined_variable) -> std::shared_ptr<Node> { 
-                            return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ combined_variables, combined_variable })); 
-                        });
 
                     // Multiply by the coefficient
-                    *addend_lhs_it = std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ std::shared_ptr<ConstantNode>(new ConstantNode(coefficient)), combined_variables }));
+                    *addend_lhs_it = std::shared_ptr<ConstantNode>(new ConstantNode(combined_constants));
 
                     // Remove the old term
                     addend_rhs_it = addends.erase(addend_rhs_it);
 
+                    // Make sure we don't segfault by attempting to access out-of-bounds memory!
                     if (addend_rhs_it == std::end(addends)) {
                         break;
                     }
-                }
+                }*/
             }
         }
 
