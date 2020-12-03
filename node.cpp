@@ -55,25 +55,43 @@ Matrix Node::MatrixValue() const
 bool Node::Equivalent(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr)
 { 
     if (lhs_ptr->Type() == rhs_ptr->Type()) {
-        std::vector<std::shared_ptr<Node>> lhs_args = lhs_ptr->Arguments();
-        std::vector<std::shared_ptr<Node>> rhs_args = rhs_ptr->Arguments();
+        if (lhs_ptr->Type() == "MatrixNode") {
+            Matrix lhs_matrix = lhs_ptr->MatrixValue();
+            Matrix rhs_matrix = rhs_ptr->MatrixValue();
 
-        if (lhs_args.size() == 0) {
-            if (lhs_ptr->Type() == "VariableNode") {
-                return lhs_ptr == rhs_ptr;
-            }
-            else if (lhs_ptr->Type() == "ConstantNode") {
-                return Approximately(lhs_ptr->ComplexValue(), rhs_ptr->ComplexValue());
+            if (lhs_matrix.Rows() == rhs_matrix.Rows() && lhs_matrix.Cols() == rhs_matrix.Cols()) {
+                for (size_t i = 0; i < lhs_matrix.Rows(); ++i) {
+                    for (size_t j = 0; j < lhs_matrix.Cols(); ++j) {
+                        if (!Node::Equivalent(lhs_matrix(i, j), rhs_matrix(i, j))) {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
             }
         }
         else {
-            for (auto lhs_arg : lhs_args) {
-                if (std::find_if(std::cbegin(rhs_args), std::cend(rhs_args), [&lhs_arg](std::shared_ptr<Node> const &rhs_arg) -> bool { return Node::Equivalent(lhs_arg, rhs_arg); }) == std::cend(rhs_args)) {
-                    return false;
+            std::vector<std::shared_ptr<Node>> lhs_args = lhs_ptr->Arguments();
+            std::vector<std::shared_ptr<Node>> rhs_args = rhs_ptr->Arguments();
+
+            if (lhs_args.size() == 0) {
+                if (lhs_ptr->Type() == "VariableNode") {
+                    return lhs_ptr == rhs_ptr;
+                }
+                else if (lhs_ptr->Type() == "ConstantNode") {
+                    return Approximately(lhs_ptr->ComplexValue(), rhs_ptr->ComplexValue());
                 }
             }
+            else {
+                for (auto lhs_arg : lhs_args) {
+                    if (std::find_if(std::cbegin(rhs_args), std::cend(rhs_args), [&lhs_arg](std::shared_ptr<Node> const &rhs_arg) -> bool { return Node::Equivalent(lhs_arg, rhs_arg); }) == std::cend(rhs_args)) {
+                        return false;
+                    }
+                }
 
-            return true;
+                return true;
+            }
         }
     }
     

@@ -441,7 +441,8 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                         }
                     }
                 }
-                /*else if (lhs_constants.size() > 0 && rhs_constants.size() > 0 && lhs_constants.size() == rhs_constants.size()) {
+                else if (lhs_constants.size() > 0 && rhs_constants.size() > 0 && lhs_variables.size() == 0 && rhs_variables.size() == 0) {
+                    // Sum the constants
                     std::complex<double> combined_constants;
                     
                     for (auto lhs_constant : lhs_constants) {
@@ -452,7 +453,6 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                         combined_constants += rhs_constant->ComplexValue();
                     }
 
-                    // Multiply by the coefficient
                     *addend_lhs_it = std::shared_ptr<ConstantNode>(new ConstantNode(combined_constants));
 
                     // Remove the old term
@@ -462,7 +462,7 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                     if (addend_rhs_it == std::end(addends)) {
                         break;
                     }
-                }*/
+                }
             }
         }
 
