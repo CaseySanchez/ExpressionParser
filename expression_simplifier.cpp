@@ -10,7 +10,20 @@ ExpressionSimplifier::ExpressionSimplifier(std::shared_ptr<Node> const &node_ptr
 
 std::shared_ptr<Node> ExpressionSimplifier::Identify()
 {
-    return Identify(m_node_ptr);
+    if (m_node_ptr->Type() == "MatrixNode") {
+        Matrix matrix = m_node_ptr->MatrixValue();
+
+        for (size_t i = 0; i < matrix.Rows(); ++i) {
+            for (size_t j = 0; j < matrix.Cols(); ++j) {
+                matrix(i, j) = ExpressionSimplifier(matrix(i, j), m_node_map).Identify();
+            }
+        }
+
+        return std::shared_ptr<MatrixNode>(new MatrixNode(matrix));
+    }
+    else {
+        return Identify(m_node_ptr);
+    }
 }
 
 std::shared_ptr<Node> ExpressionSimplifier::Identify(std::shared_ptr<Node> const &node_ptr)
@@ -163,7 +176,20 @@ std::shared_ptr<Node> ExpressionSimplifier::Identify(std::shared_ptr<Node> const
 
 std::shared_ptr<Node> ExpressionSimplifier::Distribute()
 {
-    return Distribute(m_node_ptr);
+    if (m_node_ptr->Type() == "MatrixNode") {
+        Matrix matrix = m_node_ptr->MatrixValue();
+
+        for (size_t i = 0; i < matrix.Rows(); ++i) {
+            for (size_t j = 0; j < matrix.Cols(); ++j) {
+                matrix(i, j) = ExpressionSimplifier(matrix(i, j), m_node_map).Distribute();
+            }
+        }
+
+        return std::shared_ptr<MatrixNode>(new MatrixNode(matrix));
+    }
+    else {
+        return Distribute(m_node_ptr);
+    }
 }
 
 std::shared_ptr<Node> ExpressionSimplifier::Distribute(std::shared_ptr<Node> const &node_ptr)
@@ -203,7 +229,20 @@ std::shared_ptr<Node> ExpressionSimplifier::Distribute(std::shared_ptr<Node> con
 
 std::shared_ptr<Node> ExpressionSimplifier::CombineFactors()
 {
-    return CombineFactors(m_node_ptr);
+    if (m_node_ptr->Type() == "MatrixNode") {
+        Matrix matrix = m_node_ptr->MatrixValue();
+
+        for (size_t i = 0; i < matrix.Rows(); ++i) {
+            for (size_t j = 0; j < matrix.Cols(); ++j) {
+                matrix(i, j) = ExpressionSimplifier(matrix(i, j), m_node_map).CombineFactors();
+            }
+        }
+
+        return std::shared_ptr<MatrixNode>(new MatrixNode(matrix));
+    }
+    else {
+        return CombineFactors(m_node_ptr);
+    }
 }
 
 std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node> const &node_ptr)
@@ -306,7 +345,20 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
 
 std::shared_ptr<Node> ExpressionSimplifier::CombineAddends()
 {
-    return CombineAddends(m_node_ptr);
+    if (m_node_ptr->Type() == "MatrixNode") {
+        Matrix matrix = m_node_ptr->MatrixValue();
+
+        for (size_t i = 0; i < matrix.Rows(); ++i) {
+            for (size_t j = 0; j < matrix.Cols(); ++j) {
+                matrix(i, j) = ExpressionSimplifier(matrix(i, j), m_node_map).CombineAddends();
+            }
+        }
+
+        return std::shared_ptr<MatrixNode>(new MatrixNode(matrix));
+    }
+    else {
+        return CombineAddends(m_node_ptr);
+    }
 }
 
 std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node> const &node_ptr)
