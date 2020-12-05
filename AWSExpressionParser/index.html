@@ -26,10 +26,14 @@
             <b-jumbotron class="mb-4">
               <a href="?">
                 <h1>
+                  Mathemat.io
+                </h1>
+                <h4>
+                  A
                   <span id="latex_title">
                   </span>
-                  ExpressionParser
-                </h1>
+                  Expression Parser
+                </h4>
               </a>
               <p>
                 For the source please visit our GitHub repository
@@ -45,9 +49,9 @@
         
                   <b-list-group-item class="d-flex pb-4" href="#">
                     <b-input-group>
-                      <b-form-input placeholder="Variable name" v-model="input_variable_name" trim>
+                      <b-form-input ref="input_variable_name" placeholder="Variable name" v-model="input_variable_name" trim>
                       </b-form-input>
-                      <b-form-input placeholder="Variable value" v-model="input_variable_value" trim>
+                      <b-form-input ref="input_variable_value" placeholder="Variable value" v-model="input_variable_value" trim>
                       </b-form-input>
                     </b-input-group>
         
@@ -65,8 +69,8 @@
                     <b-dropdown-item-button @click="action='Evaluate'">
                       Evaluate
                     </b-dropdown-item-button>
-                    <b-dropdown-item-button @click="action='Simplify'">
-                      Simplify
+                    <b-dropdown-item-button @click="action='Expand'">
+                      Expand
                     </b-dropdown-item-button>
                     <b-dropdown-item-button @click="action='Solve for'">
                       Solve for
@@ -115,8 +119,8 @@
                 </b-row>
                 <b-row>
                   <b-col class="text-center">
-                    <span :hidden="loading_output" ref="latex_render_output">
-                    </span>
+                    <div :hidden="loading_output" ref="latex_render_output">
+                    </div>
                     <b-spinner :hidden="!loading_output" variant="primary" label="Spinning">
                     </b-spinner>
                   </b-col>
@@ -133,36 +137,35 @@
       katex.render("L^AT_EX", latex_title);
 
       function encode(str) {
-        //return encodeURIComponent(str).replace(/\(/g, "%28").replace(/\[/g, "%5B").replace(/\{/g, "%7B").replace(/\)/g, "%29").replace(/\]/g, "%5D").replace(/\}/g, "%7D").replace(/\*/g, "%2A").replace(/\+/g, "%2B").replace(/\-/g, "%2D").replace(/\//g, "%2F").replace(/\./g, "%2E");
-        return encodeURIComponent(btoa(str));
+        return encodeURI(str.replaceAll(/\(/gi, "%28").replaceAll(/\[/gi, "%5B").replaceAll(/\{/gi, "%7B").replaceAll(/\)/gi, "%29").replaceAll(/\]/gi, "%5D").replaceAll(/\}/gi, "%7D").replaceAll(/\*/gi, "%2A").replaceAll(/\+/gi, "%2B").replaceAll(/\-/gi, "%2D").replaceAll(/\//gi, "%2F").replaceAll(/\./gi, "%2E").replaceAll(/\"/gi, "%22"));
       }
 
       function decode(str) {
-        //return decodeURIComponent(str).replace(/\%28/g, "\(").replace(/\%5B/, "\[").replace(/\%7B/g, "\{").replace(/\%29/g, "\)").replace(/\%5D/g, "\]").replace(/\%7D/g, "\}").replace(/\%2A/g, "\*").replace(/\%2B/g, "\+").replace(/\%2D/g, "\-").replace(/\%2F/g, "\/").replace(/\%2E/g, "\.");
-        return atob(decodeURIComponent(str));
+        return decodeURI(str.replaceAll(/\%28/gi, "\(").replaceAll(/\%5B/gi, "\[").replaceAll(/\%7B/gi, "\{").replaceAll(/\%29/gi, "\)").replaceAll(/\%5D/gi, "\]").replaceAll(/\%7D/gi, "\}").replaceAll(/\%2A/gi, "\*").replaceAll(/\%2B/gi, "\+").replaceAll(/\%2D/gi, "\-").replaceAll(/\%2F/gi, "\/").replaceAll(/\%2E/gi, "\.").replaceAll(/\%22/gi, "\""));
       }
 
       new Vue({
         created() {
           var params = new URLSearchParams(document.location.search.substr(1));
 
-          if (params.has("q")) {
-            let query = params.get("q");
-            let data = JSON.parse(decode(query));
+          if (params.has("input")) {
+            var input = JSON.parse(decode(params.get("input")));
 
-            this.action = data["action"];
-            this.expression = data["expression"];
-            this.variables = data["variables"];
+            this.action = input.action;
+            this.expression = input.expression;
+            this.variables = input.variables;
             
             var request = new XMLHttpRequest();
 
             request.addEventListener("load", () => {
-              this.result = request.response.replace(/ /g, "\\ ");
+              this.result = request.response.replace(/ /gi, "\\ ");
 
               this.loading_output = false;
             });
 
-            request.open("GET", "https://l9o7wanmdc.execute-api.us-east-2.amazonaws.com/prod/aws-expression-parser?q=" + query);
+            console.log("https://l9o7wanmdc.execute-api.us-east-2.amazonaws.com/prod/aws-expression-parser?" + document.location.search.substr(1));
+
+            request.open("GET", "https://l9o7wanmdc.execute-api.us-east-2.amazonaws.com/prod/aws-expression-parser?" + document.location.search.substr(1));
 
             request.setRequestHeader("Content-Type", "application/json");
 
@@ -191,15 +194,13 @@
         },
         methods: {
           goClick: function() {
-            var json = JSON.stringify({
-              "action": this.action,
-              "expression": this.expression,
-              "variables": this.variables
-            });
+            var params = encode(JSON.stringify({ 
+                "action" : this.action, 
+                "expression" : this.expression, 
+                "variables" : this.variables 
+              }));
 
-            var query = encode(json);
-
-            window.location.assign("index.html?q=" + query);
+            window.location.assign("index.html?input=" + params);
           },
           variableClick() {
             if (this.input_variable_name != "" && this.input_variable_value != "") {
@@ -208,6 +209,8 @@
 
                 this.input_variable_name = "";
                 this.input_variable_value = "";
+
+                this.$refs.input_variable_name.$el.focus();
               }
             }
           },

@@ -46,7 +46,7 @@ aws::lambda_runtime::invocation_response handler(aws::lambda_runtime::invocation
 
         response_stream << "\\begin{aligned}";
         
-        std::regex action_regex("^(Evaluate|Solve for|Simplify)(.*)$");
+        std::regex action_regex("^(Evaluate|Expand|Solve for)(.*)$");
         std::smatch action_match;
 
         if (std::regex_search(std::cbegin(action_str), std::cend(action_str), action_match, action_regex)) {
@@ -61,13 +61,10 @@ aws::lambda_runtime::invocation_response handler(aws::lambda_runtime::invocation
 
                     std::shared_ptr<Node> node_ptr(expression_parser.Parse());
 
-                    response_stream << node_ptr;
+                    response_stream << "=" << node_ptr;
                 }
             }
-            else if (action_match[1].str() == "Solve for") {
-
-            }
-            else if (action_match[1].str() == "Simplify") {
+            else if (action_match[1].str() == "Expand") {
                 ExpressionParser expression_parser(expression_str, node_map);
                 
                 std::shared_ptr<Node> node_ptr(expression_parser.Parse());
@@ -76,9 +73,7 @@ aws::lambda_runtime::invocation_response handler(aws::lambda_runtime::invocation
 
                 std::shared_ptr<Node> distributed_ptr = ExpressionSimplifier(node_ptr, node_map).Distribute();
 
-                if (!Node::Equivalent(distributed_ptr, node_ptr)) {
-                    response_stream << "&=" << ExpressionComposer(distributed_ptr, node_map) << "\\\\";
-                }
+                response_stream << "&=" << ExpressionComposer(distributed_ptr, node_map) << "\\\\";
 
                 std::shared_ptr<Node> distributed_identified_ptr = ExpressionSimplifier(distributed_ptr, node_map).Identify();
 
@@ -105,6 +100,9 @@ aws::lambda_runtime::invocation_response handler(aws::lambda_runtime::invocation
                 if (!Node::Equivalent(combined_addends_identified_ptr, combined_addends_ptr)) {
                     response_stream << "&=" << ExpressionComposer(combined_addends_identified_ptr, node_map);
                 }
+            }
+            else if (action_match[1].str() == "Solve for") {
+
             }
             else {
                 throw std::invalid_argument("No action provided");

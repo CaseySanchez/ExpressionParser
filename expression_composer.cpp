@@ -27,23 +27,48 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
     if (node_ptr->Type() == "MatrixNode") {
         Matrix matrix = node_ptr->MatrixValue();
 
-        ostream << "\\begin{bmatrix}";
+        if (precedence == 1) {
+            ostream << "\\left(";
 
-        for (size_t i = 0; i < matrix.Rows(); ++i) {
-            for (size_t j = 0; j < matrix.Cols(); ++j) {
-                ostream << ExpressionComposer(matrix(i, j), m_node_map);
-        
-                if (j < matrix.Cols() - 1) {
-                    ostream << "&";
+            ostream << "\\begin{bmatrix}";
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    ostream << ExpressionComposer(matrix(i, j), m_node_map);
+            
+                    if (j < matrix.Cols() - 1) {
+                        ostream << "&";
+                    }
+                }
+
+                if (i < matrix.Rows() - 1) {
+                    ostream << "\\\\";
                 }
             }
 
-            if (i < matrix.Rows() - 1) {
-                ostream << "\\\\";
-            }
-        }
+            ostream << "\\end{bmatrix}";
 
-        ostream << "\\end{bmatrix}";
+            ostream << "\\right)";
+        }
+        else {
+            ostream << "\\begin{bmatrix}";
+
+            for (size_t i = 0; i < matrix.Rows(); ++i) {
+                for (size_t j = 0; j < matrix.Cols(); ++j) {
+                    ostream << ExpressionComposer(matrix(i, j), m_node_map);
+            
+                    if (j < matrix.Cols() - 1) {
+                        ostream << "&";
+                    }
+                }
+
+                if (i < matrix.Rows() - 1) {
+                    ostream << "\\\\";
+                }
+            }
+
+            ostream << "\\end{bmatrix}";
+        }
     }
     else if (node_ptr->Type() == "VariableNode") {
         auto node_it = std::find_if(std::cbegin(m_node_map), std::cend(m_node_map), 
@@ -51,11 +76,25 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
                 return node_pair.second == node_ptr;
             });
 
-        if (node_it != std::cend(m_node_map)) {
-            ostream << node_it->first;
+        if (precedence == 1) {
+            ostream << "\\left(";
+
+            if (node_it != std::cend(m_node_map)) {
+                ostream << node_it->first;
+            }
+            else {
+                ostream << node_ptr;
+            }
+
+            ostream << "\\right)";
         }
         else {
-            ostream << node_ptr;
+            if (node_it != std::cend(m_node_map)) {
+                ostream << node_it->first;
+            }
+            else {
+                ostream << node_ptr;
+            }
         }
     }
     else if (node_ptr->Type() == "ConstantNode") {
@@ -64,11 +103,25 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
                 return node_pair.second == node_ptr;
             });
 
-        if (node_it != std::cend(m_node_map)) {
-            ostream << node_it->first;
+        if (precedence == 1) {
+            ostream << "\\left(";
+
+            if (node_it != std::cend(m_node_map)) {
+                ostream << node_it->first;
+            }
+            else {
+                ostream << node_ptr;
+            }
+
+            ostream << "\\right)";
         }
         else {
-            ostream << node_ptr;
+            if (node_it != std::cend(m_node_map)) {
+                ostream << node_it->first;
+            }
+            else {
+                ostream << node_ptr;
+            }
         }
     }
     else if (node_ptr->Type() == "ExponentiationNode") {
