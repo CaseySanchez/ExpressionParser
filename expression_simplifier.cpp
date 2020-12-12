@@ -15,11 +15,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Identify()
 
 std::shared_ptr<Node> ExpressionSimplifier::Identify(std::shared_ptr<Node> const &node_ptr)
 {
-    for (auto &argument : node_ptr->Arguments()) {
-        argument = Identify(argument);
-    }
-
-    if (m_node_ptr->Type() == "MatrixNode") {
+    if (node_ptr->Type() == "MatrixNode") {
         Matrix matrix = m_node_ptr->MatrixValue();
 
         for (size_t i = 0; i < matrix.Rows(); ++i) {
@@ -31,6 +27,10 @@ std::shared_ptr<Node> ExpressionSimplifier::Identify(std::shared_ptr<Node> const
         return std::shared_ptr<MatrixNode>(new MatrixNode(matrix));
     }
     else {
+        for (auto &argument : node_ptr->Arguments()) {
+            argument = Identify(argument);
+        }
+        
         if (node_ptr->Type() == "ExponentiationNode") {
             if (node_ptr->Argument(1)->Type() == "ConstantNode") {
                 if (Approximately(node_ptr->Argument(1)->ComplexValue(), 0.0)) {
@@ -181,22 +181,24 @@ std::shared_ptr<Node> ExpressionSimplifier::Distribute()
 
 std::shared_ptr<Node> ExpressionSimplifier::Distribute(std::shared_ptr<Node> const &node_ptr)
 {
-    for (auto &argument : node_ptr->Arguments()) {
-        argument = Distribute(argument);
-    }
-
-    if (m_node_ptr->Type() == "MatrixNode") {
+    if (node_ptr->Type() == "MatrixNode") {
         Matrix matrix = m_node_ptr->MatrixValue();
 
         for (size_t i = 0; i < matrix.Rows(); ++i) {
             for (size_t j = 0; j < matrix.Cols(); ++j) {
-                matrix(i, j) = Distribute(matrix(i, j));
+                auto element = Distribute(matrix(i, j));
+
+                matrix(i, j) = element;
             }
         }
 
         return std::shared_ptr<MatrixNode>(new MatrixNode(matrix));
     }
     else {
+        for (auto &argument : node_ptr->Arguments()) {
+            argument = Distribute(argument);
+        }
+        
         std::vector<std::shared_ptr<Node>> factors = Factors(node_ptr);
 
         if (factors.size() > 0) {
@@ -234,10 +236,6 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors()
 
 std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node> const &node_ptr)
 {
-    for (auto &argument : node_ptr->Arguments()) {
-        argument = CombineFactors(argument);
-    }
-
     if (node_ptr->Type() == "MatrixNode") {
         Matrix matrix = node_ptr->MatrixValue();
 
@@ -250,6 +248,10 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
         return std::shared_ptr<MatrixNode>(new MatrixNode(matrix));
     }
     else {
+        for (auto &argument : node_ptr->Arguments()) {
+            argument = CombineFactors(argument);
+        }
+        
         std::vector<std::shared_ptr<Node>> factors = Factors(node_ptr);
 
         if (factors.size() > 0) {
@@ -350,11 +352,7 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends()
 
 std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node> const &node_ptr)
 {
-    for (auto &argument : node_ptr->Arguments()) {
-        argument = CombineAddends(argument);
-    }
-
-    if (m_node_ptr->Type() == "MatrixNode") {
+    if (node_ptr->Type() == "MatrixNode") {
         Matrix matrix = m_node_ptr->MatrixValue();
 
         for (size_t i = 0; i < matrix.Rows(); ++i) {
@@ -366,6 +364,10 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
         return std::shared_ptr<MatrixNode>(new MatrixNode(matrix));
     }
     else {
+        for (auto &argument : node_ptr->Arguments()) {
+            argument = CombineAddends(argument);
+        }
+
         std::vector<std::shared_ptr<Node>> addends = Addends(node_ptr);
 
         if (addends.size() > 0) {
