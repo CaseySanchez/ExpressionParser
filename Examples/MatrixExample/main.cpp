@@ -19,12 +19,12 @@ int main(int argc, char *argv[])
         
         ExpressionParser expression_parser(expression_str, node_map);
 
-        std::shared_ptr<Node> matrix_node(expression_parser.Parse());
+        std::shared_ptr<Node> matrix_node = expression_parser.Parse();
 
         for (int i = 1; i <= 8; ++i) {
             *theta = 2 * 3.14159 * (static_cast<double>(i) / 8.0);
 
-            std::cout << "r(" << static_cast<Node>(*theta) << ") * v = " << matrix_node << std::endl;
+            std::cout << "m(" << std::static_pointer_cast<Node>(theta) << ") * v = " << matrix_node << std::endl << std::endl;
         }
 
         std::cout << "Visualized expression tree: " << std::endl;

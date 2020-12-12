@@ -179,31 +179,43 @@ void ExpressionComposer::Compose(std::ostream &ostream, std::shared_ptr<Node> co
         if (precedence == 2) {
             ostream << "{";
             
+            ostream << "\\frac{";
+
             Compose(ostream, node_ptr->Argument(0), 3);
             
-            ostream << "/";
+            ostream << "}{";
             
             Compose(ostream, node_ptr->Argument(1), 3);
             
             ostream << "}";
+
+            ostream << "}";
         }
         else if (precedence < 3) {
             ostream << "\\left(";
+
+            ostream << "\\frac{";
             
             Compose(ostream, node_ptr->Argument(0), 3);
             
-            ostream << "/";
+            ostream << "}{";
             
             Compose(ostream, node_ptr->Argument(1), 3);
             
+            ostream << "}";
+
             ostream << "\\right)";
         }
         else {
+            ostream << "\\frac{";
+
             Compose(ostream, node_ptr->Argument(0), 3);
             
-            ostream << "/";
+            ostream << "}{";
             
             Compose(ostream, node_ptr->Argument(1), 3);
+
+            ostream << "}";
         }
     }
     else if (node_ptr->Type() == "AdditionNode") {

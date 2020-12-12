@@ -23,14 +23,14 @@ int main(int argc, char *argv[])
         
         std::shared_ptr<Node> psi = expression_parser.Parse();
 
-        for (double radius = 0.0; radius < 2.0; radius += 0.5) {
+        for (double rho = 0.0; rho < 2.0; rho += 0.5) {
             for (double theta = 0.0; theta < 3.14159; theta += 0.5 * 3.14159) {
                 for (double phi = 0.0; phi < 2.0 * 3.14159; phi += 0.5 * 3.14159) {
-                    *x = radius * std::sin(theta) * std::cos(phi);
-                    *y = radius * std::sin(theta) * std::sin(phi);
-                    *z = radius * std::cos(theta);
+                    *x = rho * std::sin(theta) * std::cos(phi);
+                    *y = rho * std::sin(theta) * std::sin(phi);
+                    *z = rho * std::cos(theta);
 
-                    std::cout << "psi(" << radius << ", " << theta << ", " << phi << ") = " << psi << std::endl;
+                    std::cout << "psi(" << rho << ", " << theta << ", " << phi << ") = " << psi << std::endl << std::endl;
                 }
             }
         }

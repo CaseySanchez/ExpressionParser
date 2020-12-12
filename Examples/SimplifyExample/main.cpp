@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 
         std::map<std::string, std::shared_ptr<Node>> node_map = { { "x", x }, { "y", y } };
 
-        ExpressionParser expression_parser("(x+y)*(x+y)+y^(x+1)", node_map);
+        ExpressionParser expression_parser("\\frac{y}{x}*x^{x+2}*x^{x+2}*x^{x+2}", node_map);
 
         std::shared_ptr<Node> node_ptr = expression_parser.Parse();
 
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         std::cout << ExpressionComposer(distributed_ptr, node_map) << std::endl << std::endl;
 
         std::shared_ptr<Node> combined_factors_ptr = ExpressionSimplifier(ExpressionSimplifier(distributed_ptr, node_map).CombineFactors(), node_map).Identify();
-
+        
         std::cout << "Visualized expression tree: " << std::endl;
         std::cout << ExpressionVisualizer(combined_factors_ptr, node_map) << std::endl << std::endl;
 
