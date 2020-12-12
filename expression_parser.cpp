@@ -181,43 +181,7 @@ std::shared_ptr<Node> ExpressionParser::Brackets(std::string const &expression_s
         if ((bracket_match[2].str() == "(" && bracket_match[4].str() == ")") || 
             (bracket_match[2].str() == "[" && bracket_match[4].str() == "]") || 
             (bracket_match[2].str() == "{" && bracket_match[4].str() == "}")) {
-            std::shared_ptr<Node> expression_ptr = Operators(bracket_match[3].str());
-
-            if (std::regex_search(bracket_match[1].first, bracket_match[1].second, function_match, function_regex)) {
-                std::string function_text;
-                std::string function_pre_text;
-                std::string function_post_text;
-                
-                if (!function_match[3].str().empty()) {
-                    function_text = function_match[3].str();
-                    function_pre_text = function_match[1].str();
-                    function_post_text = bracket_match[5].str();
-                }
-                else if (!function_match[4].str().empty()) {
-                    function_text = function_match[4].str();
-                    function_pre_text = "";
-                    function_post_text = bracket_match[5].str();
-                }
-
-                if (!function_text.empty()) {
-                    std::shared_ptr<Node> function_ptr;
-
-                    try {
-                        auto function_generator = s_function_map.at(function_text);
-
-                        function_ptr = function_generator(expression_ptr);
-                    }
-                    catch(std::exception const &) {
-                        throw std::invalid_argument("Unrecognized function: " + function_text);
-                    }
-                    
-                    std::string function_name = m_parser_context->NextFunctionName();
-
-                    m_node_map.emplace(function_name, function_ptr);
-                    
-                    return Brackets(function_pre_text + function_name + function_post_text);
-                }
-            }
+            std::shared_ptr<Node> expression_ptr = Functions(bracket_match[3].str());
 
             std::string expression_name = m_parser_context->NextExpressionName();
 
@@ -230,6 +194,34 @@ std::shared_ptr<Node> ExpressionParser::Brackets(std::string const &expression_s
         }
     }
     
+    return Functions(expression_str);
+}
+
+std::shared_ptr<Node> ExpressionParser::Functions(std::string const &expression_str)
+{
+    std::regex function_regex("^(.*)(cos|sin|tan|acos|asin|atan|sqrt|abs|exp|log|det|inv)(E_\\d+)(.*?)$");
+
+    std::smatch function_match;
+
+    if (std::regex_search(std::cbegin(expression_str), std::cend(expression_str), function_match, function_regex)) {
+        std::shared_ptr<Node> function_ptr;
+
+        try {
+            auto function_generator = s_function_map.at(function_match[2].str());
+
+            function_ptr = function_generator(m_node_map.at(function_match[3].str()));
+        }
+        catch(std::exception const &) {
+            throw std::invalid_argument("Unrecognized function: " + function_match[2].str());
+        }
+        
+        std::string function_name = m_parser_context->NextFunctionName();
+
+        m_node_map.emplace(function_name, function_ptr);
+        
+        return Functions(function_match[1].str() + function_name + function_match[4].str());
+    }
+
     return Operators(expression_str);
 }
 
@@ -285,10 +277,10 @@ std::shared_ptr<Node> ExpressionParser::Operators(std::string const &expression_
     return Nodes(expression_str);
 }
 
-std::shared_ptr<Node> ExpressionParser::Nodes(std::string const &node_str)
+std::shared_ptr<Node> ExpressionParser::Nodes(std::string const &expression_str)
 {
     try {
-        ComplexParser complex_parser(node_str);
+        ComplexParser complex_parser(expression_str);
 
         std::complex<double> value = complex_parser.Parse();
 
@@ -302,10 +294,10 @@ std::shared_ptr<Node> ExpressionParser::Nodes(std::string const &node_str)
     }
     catch (std::invalid_argument const &) {
         try {
-            return m_node_map.at(node_str);
+            return m_node_map.at(expression_str);
         }
         catch(std::out_of_range const &) {
-            throw std::invalid_argument("No node provided for: " + node_str);
+            throw std::invalid_argument("No node provided for: " + expression_str);
         }
     }
 }

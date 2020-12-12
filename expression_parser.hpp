@@ -67,6 +67,7 @@ private:
     void Rows(std::string const &expression_str, std::vector<std::vector<std::shared_ptr<Node>>> &row_elements);
 
     std::shared_ptr<Node> Brackets(std::string const &expression_str);
+    std::shared_ptr<Node> Functions(std::string const &expression_str);
     std::shared_ptr<Node> Operators(std::string const &expression_str);
-    std::shared_ptr<Node> Nodes(std::string const &node_str);
+    std::shared_ptr<Node> Nodes(std::string const &expression_str);
 };
