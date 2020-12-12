@@ -186,9 +186,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Distribute(std::shared_ptr<Node> con
 
         for (size_t i = 0; i < matrix.Rows(); ++i) {
             for (size_t j = 0; j < matrix.Cols(); ++j) {
-                auto element = Distribute(matrix(i, j));
-
-                matrix(i, j) = element;
+                matrix(i, j) = Distribute(matrix(i, j));
             }
         }
 
