@@ -30,21 +30,6 @@ std::string ExpressionParserContext::NextMatrixName()
     return "M_" + std::to_string(m_matrix_id++);
 }
 
-std::map<std::string, std::function<std::shared_ptr<Node>(std::shared_ptr<Node>)>> ExpressionParser::s_function_map {
-    { "cos", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<CosNode>(new CosNode({ node_ptr })); } },
-    { "sin", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<SinNode>(new SinNode({ node_ptr })); } },
-    { "tan", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<TanNode>(new TanNode({ node_ptr })); } },
-    { "acos", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<AcosNode>(new AcosNode({ node_ptr })); } },
-    { "asin", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<AsinNode>(new AsinNode({ node_ptr })); } },
-    { "atan", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<AtanNode>(new AtanNode({ node_ptr })); } },
-    { "sqrt", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<SqrtNode>(new SqrtNode({ node_ptr })); } },
-    { "abs", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<AbsNode>(new AbsNode({ node_ptr })); } },
-    { "exp", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<ExpNode>(new ExpNode({ node_ptr })); } },
-    { "log", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<LogNode>(new LogNode({ node_ptr })); } },
-    { "det", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<DeterminantNode>(new DeterminantNode({ node_ptr })); } },
-    { "inv", [](std::shared_ptr<Node> const &node_ptr) -> std::shared_ptr<Node> { return std::shared_ptr<InverseNode>(new InverseNode({ node_ptr })); } }
-};
-
 ExpressionParser::ExpressionParser(std::string const &expression_str, std::map<std::string, std::shared_ptr<Node>> const &node_map, std::shared_ptr<ExpressionParserContext> const &parser_context, bool const &clean_and_verify) : m_expression_str(expression_str), m_node_map(node_map), m_parser_context(parser_context)
 {
     if (clean_and_verify) {
@@ -199,27 +184,81 @@ std::shared_ptr<Node> ExpressionParser::Brackets(std::string const &expression_s
 
 std::shared_ptr<Node> ExpressionParser::Functions(std::string const &expression_str)
 {
-    std::regex function_regex("^(.*)(cos|sin|tan|acos|asin|atan|sqrt|abs|exp|log|det|inv)(E_\\d+)(.*?)$");
+    std::regex function_regex("^(.*)(cos|sin|tan|acos|asin|atan|sqrt|abs|exp|log|det|inv)(E_\\d+)(.*?)$|^(.*)(\\\\frac)(E_\\d+)(E_\\d+)(.*?)$");
 
     std::smatch function_match;
 
-    if (std::regex_search(std::cbegin(expression_str), std::cend(expression_str), function_match, function_regex)) {
-        std::shared_ptr<Node> function_ptr;
+    if (std::regex_search(std::cbegin(expression_str), std::cend(expression_str), function_match, function_regex)) {    
+        if (!function_match[2].str().empty()) {
+            std::shared_ptr<Node> arg_ptr = m_node_map.at(function_match[3].str());
+             
+            std::shared_ptr<Node> function_ptr;
 
-        try {
-            auto function_generator = s_function_map.at(function_match[2].str());
+            if (function_match[2].str() == "cos") {
+                function_ptr = std::shared_ptr<CosNode>(new CosNode({ arg_ptr }));
+            }
+            else if (function_match[2].str() == "sin") {
+                function_ptr = std::shared_ptr<SinNode>(new SinNode({ arg_ptr }));
+            }
+            else if (function_match[2].str() == "tan") {
+                function_ptr = std::shared_ptr<TanNode>(new TanNode({ arg_ptr }));
+            }
+            else if (function_match[2].str() == "acos") {
+                function_ptr = std::shared_ptr<AcosNode>(new AcosNode({ arg_ptr }));   
+            }
+            else if (function_match[2].str() == "asin") {
+                function_ptr = std::shared_ptr<AsinNode>(new AsinNode({ arg_ptr }));
+            }
+            else if (function_match[2].str() == "atan") {
+                function_ptr = std::shared_ptr<AtanNode>(new AtanNode({ arg_ptr }));
+            }
+            else if (function_match[2].str() == "sqrt") {
+                function_ptr = std::shared_ptr<SqrtNode>(new SqrtNode({ arg_ptr }));
+            }
+            else if (function_match[2].str() == "abs") {
+                function_ptr = std::shared_ptr<AbsNode>(new AbsNode({ arg_ptr }));
+            }
+            else if (function_match[2].str() == "exp") {
+                function_ptr = std::shared_ptr<ExpNode>(new ExpNode({ arg_ptr }));
+            }
+            else if (function_match[2].str() == "log") {
+                function_ptr = std::shared_ptr<LogNode>(new LogNode({ arg_ptr }));
+            }
+            else if (function_match[2].str() == "det") {
+                function_ptr = std::shared_ptr<DeterminantNode>(new DeterminantNode({ arg_ptr }));
+            }
+            else if (function_match[2].str() == "inv") {
+                function_ptr = std::shared_ptr<InverseNode>(new InverseNode({ arg_ptr }));
+            }
+            else {
+                throw std::invalid_argument("Unrecognized function: " + function_match[2].str());
+            }
+            
+            std::string function_name = m_parser_context->NextFunctionName();
 
-            function_ptr = function_generator(m_node_map.at(function_match[3].str()));
+            m_node_map.emplace(function_name, function_ptr);
+            
+            return Functions(function_match[1].str() + function_name + function_match[4].str());
         }
-        catch(std::exception const &) {
-            throw std::invalid_argument("Unrecognized function: " + function_match[2].str());
-        }
-        
-        std::string function_name = m_parser_context->NextFunctionName();
+        else if (!function_match[6].str().empty()) {
+            std::shared_ptr<Node> lhs_arg_ptr = m_node_map.at(function_match[7].str());
+            std::shared_ptr<Node> rhs_arg_ptr = m_node_map.at(function_match[8].str());
 
-        m_node_map.emplace(function_name, function_ptr);
-        
-        return Functions(function_match[1].str() + function_name + function_match[4].str());
+            std::shared_ptr<Node> function_ptr;
+            
+            if (function_match[6].str() == "\\frac") {
+                function_ptr = std::shared_ptr<DivisionNode>(new DivisionNode({ lhs_arg_ptr, rhs_arg_ptr }));
+            }
+            else {
+                throw std::invalid_argument("Unrecognized function: " + function_match[6].str());
+            }
+
+            std::string function_name = m_parser_context->NextFunctionName();
+
+            m_node_map.emplace(function_name, function_ptr);
+            
+            return Functions(function_match[5].str() + function_name + function_match[9].str());
+        }
     }
 
     return Operators(expression_str);
