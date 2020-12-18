@@ -560,7 +560,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Factorize(std::shared_ptr<Node> cons
                 [](std::vector<std::shared_ptr<Node>> const &common_factors, std::vector<std::shared_ptr<Node>> const &factors) -> std::vector<std::shared_ptr<Node>> {
                     std::vector<std::shared_ptr<Node>> factors_intersection;
                     
-                    std::set_intersection(std::cbegin(factors), std::cend(factors), std::cbegin(common_factors), std::cend(common_factors), std::back_inserter(factors_intersection));
+                    std::set_intersection(std::cbegin(factors), std::cend(factors), std::cbegin(common_factors), std::cend(common_factors), std::back_inserter(factors_intersection), [](std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr) -> bool { return !Node::Equivalent(lhs_ptr, rhs_ptr); });
 
                     return factors_intersection;
                 });
@@ -573,29 +573,31 @@ std::shared_ptr<Node> ExpressionSimplifier::Factorize(std::shared_ptr<Node> cons
                     [&common_factors](std::vector<std::shared_ptr<Node>> const &uncommon_factors, std::vector<std::shared_ptr<Node>> const &factors) -> std::vector<std::shared_ptr<Node>> {
                         std::vector<std::shared_ptr<Node>> factors_difference;
                         
-                        std::set_difference(std::cbegin(factors), std::cend(factors), std::cbegin(common_factors), std::cend(common_factors), std::back_inserter(factors_difference));
+                        std::set_difference(std::cbegin(factors), std::cend(factors), std::cbegin(common_factors), std::cend(common_factors), std::back_inserter(factors_difference), [](std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr) -> bool { return !Node::Equivalent(lhs_ptr, rhs_ptr); });
 
                         std::copy(std::cbegin(uncommon_factors), std::cend(uncommon_factors), std::back_inserter(factors_difference));
 
                         return factors_difference;
                     });
 
-                // [ 2, w ] = 2*w
-                std::shared_ptr<Node> common_factors_ptr = std::reduce(std::next(std::cbegin(common_factors)), std::cend(common_factors), common_factors.front(), 
-                    [](std::shared_ptr<Node> const &common_factors_ptr, std::shared_ptr<Node> const &common_factor) -> std::shared_ptr<Node> { 
-                        return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ common_factors_ptr, common_factor }));
-                    });
+                if (uncommon_factors.size() > 0) {
+                    // [ 2, w ] = 2*w
+                    std::shared_ptr<Node> common_factors_ptr = std::reduce(std::next(std::cbegin(common_factors)), std::cend(common_factors), common_factors.front(), 
+                        [](std::shared_ptr<Node> const &common_factors_ptr, std::shared_ptr<Node> const &common_factor) -> std::shared_ptr<Node> { 
+                            return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ common_factors_ptr, common_factor }));
+                        });
 
-                // [ x, y, z ] = x+y+z
-                std::shared_ptr<Node> uncommon_factors_ptr = std::reduce(std::next(std::cbegin(uncommon_factors)), std::cend(uncommon_factors), uncommon_factors.front(), 
-                    [](std::shared_ptr<Node> const &uncommon_factors_ptr, std::shared_ptr<Node> const &uncommon_factor) -> std::shared_ptr<Node> { 
-                        return std::shared_ptr<AdditionNode>(new AdditionNode({ uncommon_factors_ptr, uncommon_factor }));
-                    });
+                    // [ x, y, z ] = x+y+z
+                    std::shared_ptr<Node> uncommon_factors_ptr = std::reduce(std::next(std::cbegin(uncommon_factors)), std::cend(uncommon_factors), uncommon_factors.front(), 
+                        [](std::shared_ptr<Node> const &uncommon_factors_ptr, std::shared_ptr<Node> const &uncommon_factor) -> std::shared_ptr<Node> { 
+                            return std::shared_ptr<AdditionNode>(new AdditionNode({ uncommon_factors_ptr, uncommon_factor }));
+                        });
 
-                return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({
-                    common_factors_ptr,
-                    uncommon_factors_ptr
-                }));
+                    return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({
+                        common_factors_ptr,
+                        uncommon_factors_ptr
+                    }));
+                }
             }
         }
 
