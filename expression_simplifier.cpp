@@ -8,6 +8,16 @@ ExpressionSimplifier::ExpressionSimplifier(std::shared_ptr<Node> const &node_ptr
 {
 }
 
+std::shared_ptr<Node> ExpressionSimplifier::Simplify()
+{
+    std::shared_ptr<Node> distributed_ptr = ExpressionSimplifier(m_node_ptr, m_node_map).Distribute();
+    std::shared_ptr<Node> combined_factors_ptr = ExpressionSimplifier(distributed_ptr, m_node_map).CombineFactors();
+    std::shared_ptr<Node> combined_addends_ptr = ExpressionSimplifier(combined_factors_ptr, m_node_map).CombineAddends();
+    std::shared_ptr<Node> factorized_ptr = ExpressionSimplifier(combined_addends_ptr, m_node_map).Factorize();
+
+    return factorized_ptr;
+}
+
 std::shared_ptr<Node> ExpressionSimplifier::Identify()
 {
     return Identify(m_node_ptr);
@@ -159,12 +169,41 @@ std::shared_ptr<Node> ExpressionSimplifier::Identify(std::shared_ptr<Node> const
                 return std::shared_ptr<ConstantNode>(new ConstantNode(std::abs(node_ptr->Argument(0)->ComplexValue())));
             }
         }
-        else if (node_ptr->Type() == "Exp") {
+        else if (node_ptr->Type() == "ExpNode") {
             if (node_ptr->Argument(0)->Type() == "ConstantNode") {
                 return std::shared_ptr<ConstantNode>(new ConstantNode(std::exp(node_ptr->Argument(0)->ComplexValue())));
             }
+            else {
+                std::vector<std::shared_ptr<Node>> factors = Factors(node_ptr->Argument(0));
+
+                std::vector<std::shared_ptr<Node>> base_factors;
+                std::vector<std::shared_ptr<Node>> exp_factors;
+
+                std::partition_copy(std::cbegin(factors), std::cend(factors), std::back_inserter(base_factors), std::back_inserter(exp_factors), [](std::shared_ptr<Node> const &factor_ptr) -> bool { return factor_ptr->Type() == "LnNode"; });
+
+                if (base_factors.size() > 0) {
+                    std::shared_ptr<Node> base_ptr = std::reduce(std::next(std::cbegin(base_factors)), std::cend(base_factors), base_factors.front()->Argument(0), 
+                        [](std::shared_ptr<Node> const &base_ptr, std::shared_ptr<Node> const &factor_ptr) { 
+                            return std::shared_ptr<AdditionNode>(new AdditionNode({ base_ptr, factor_ptr->Argument(0) })); 
+                        });
+
+                    if (exp_factors.size() > 0) {
+                        std::shared_ptr<Node> exp_ptr = std::reduce(std::next(std::cbegin(exp_factors)), std::cend(exp_factors), exp_factors.front(), 
+                            [](std::shared_ptr<Node> const &exp_ptr, std::shared_ptr<Node> const &factor_ptr) { 
+                                return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ exp_ptr, factor_ptr })); 
+                            });
+
+                        return std::shared_ptr<ExponentiationNode>(new ExponentiationNode({
+                            base_ptr,
+                            exp_ptr
+                        }));
+                    }
+
+                    return base_ptr;
+                }
+            }
         }
-        else if (node_ptr->Type() == "Log") {
+        else if (node_ptr->Type() == "LnNode") {
             if (node_ptr->Argument(0)->Type() == "ConstantNode") {
                 return std::shared_ptr<ConstantNode>(new ConstantNode(std::log(node_ptr->Argument(0)->ComplexValue())));
             }
@@ -176,7 +215,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Identify(std::shared_ptr<Node> const
 
 std::shared_ptr<Node> ExpressionSimplifier::Distribute()
 {
-    return Distribute(m_node_ptr);
+    return Identify(Distribute(m_node_ptr));
 }
 
 std::shared_ptr<Node> ExpressionSimplifier::Distribute(std::shared_ptr<Node> const &node_ptr)
@@ -208,7 +247,10 @@ std::shared_ptr<Node> ExpressionSimplifier::Distribute(std::shared_ptr<Node> con
 
                 for (auto lhs_addend_it = std::cbegin(lhs_addends); lhs_addend_it != std::cend(lhs_addends); ++lhs_addend_it) {
                     for (auto rhs_addend_it = std::cbegin(rhs_addends); rhs_addend_it != std::cend(rhs_addends); ++rhs_addend_it) {
-                        std::shared_ptr<MultiplicationNode> multiplication_ptr(new MultiplicationNode({ *lhs_addend_it, *rhs_addend_it }));
+                        std::shared_ptr<MultiplicationNode> multiplication_ptr(new MultiplicationNode({ 
+                            *lhs_addend_it, 
+                            *rhs_addend_it 
+                        }));
 
                         if (lhs_addend_it == std::cbegin(lhs_addends) && rhs_addend_it == std::cbegin(rhs_addends)) {
                             distributed_ptr = multiplication_ptr;
@@ -229,7 +271,7 @@ std::shared_ptr<Node> ExpressionSimplifier::Distribute(std::shared_ptr<Node> con
 
 std::shared_ptr<Node> ExpressionSimplifier::CombineFactors()
 {
-    return CombineFactors(m_node_ptr);
+    return Identify(CombineFactors(m_node_ptr));
 }
 
 std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node> const &node_ptr)
@@ -345,7 +387,7 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineFactors(std::shared_ptr<Node>
 
 std::shared_ptr<Node> ExpressionSimplifier::CombineAddends()
 {
-    return CombineAddends(m_node_ptr);
+    return Identify(CombineAddends(m_node_ptr));
 }
 
 std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node> const &node_ptr)
@@ -472,6 +514,89 @@ std::shared_ptr<Node> ExpressionSimplifier::CombineAddends(std::shared_ptr<Node>
                 });
 
             return combined_addends;
+        }
+
+        return node_ptr;
+    }
+}
+
+std::shared_ptr<Node> ExpressionSimplifier::Factorize()
+{
+    return Identify(Factorize(m_node_ptr));
+}
+
+std::shared_ptr<Node> ExpressionSimplifier::Factorize(std::shared_ptr<Node> const &node_ptr)
+{
+    if (node_ptr->Type() == "MatrixNode") {
+        Matrix matrix = m_node_ptr->MatrixValue();
+
+        for (size_t i = 0; i < matrix.Rows(); ++i) {
+            for (size_t j = 0; j < matrix.Cols(); ++j) {
+                matrix(i, j) = Factorize(matrix(i, j));
+            }
+        }
+
+        return std::shared_ptr<MatrixNode>(new MatrixNode(matrix));
+    }
+    else {
+        for (auto &argument : node_ptr->Arguments()) {
+            argument = Factorize(argument);
+        }
+
+        // [ 2*w*x, 2*w*y, 2*w*z ]
+        std::vector<std::shared_ptr<Node>> addends = Addends(node_ptr);
+
+        // [ [ 2, w, x ], [ 2, w, y ], [ 2, w, z ] ]
+        std::vector<std::vector<std::shared_ptr<Node>>> factors_of_addends;
+
+        std::transform(std::cbegin(addends), std::cend(addends), std::back_inserter(factors_of_addends), 
+            [](std::shared_ptr<Node> const &addend_ptr) -> std::vector<std::shared_ptr<Node>> { 
+                return Factors(addend_ptr);
+            });
+
+        if (factors_of_addends.size() > 1) {
+            // [ 2, w, x ] ∩ [ 2, w, y ] ∩ [ 2, w, z ] = [ 2, w ]
+            std::vector<std::shared_ptr<Node>> common_factors = std::reduce(std::next(std::cbegin(factors_of_addends)), std::cend(factors_of_addends), factors_of_addends.front(), 
+                [](std::vector<std::shared_ptr<Node>> const &common_factors, std::vector<std::shared_ptr<Node>> const &factors) -> std::vector<std::shared_ptr<Node>> {
+                    std::vector<std::shared_ptr<Node>> factors_intersection;
+                    
+                    std::set_intersection(std::cbegin(factors), std::cend(factors), std::cbegin(common_factors), std::cend(common_factors), std::back_inserter(factors_intersection));
+
+                    return factors_intersection;
+                });
+
+            if (common_factors.size() > 0) {
+                // [ 2, w, x ] - [ 2, w ] = [ x ] ...
+                // [ 2, w, y ] - [ 2, w ] = [ x, y ] ...
+                // [ 2, w, z ] - [ 2, w ] = [ x, y, z ]
+                std::vector<std::shared_ptr<Node>> uncommon_factors = std::reduce(std::cbegin(factors_of_addends), std::cend(factors_of_addends), std::vector<std::shared_ptr<Node>>(),
+                    [&common_factors](std::vector<std::shared_ptr<Node>> const &uncommon_factors, std::vector<std::shared_ptr<Node>> const &factors) -> std::vector<std::shared_ptr<Node>> {
+                        std::vector<std::shared_ptr<Node>> factors_difference;
+                        
+                        std::set_difference(std::cbegin(factors), std::cend(factors), std::cbegin(common_factors), std::cend(common_factors), std::back_inserter(factors_difference));
+
+                        std::copy(std::cbegin(uncommon_factors), std::cend(uncommon_factors), std::back_inserter(factors_difference));
+
+                        return factors_difference;
+                    });
+
+                // [ 2, w ] = 2*w
+                std::shared_ptr<Node> common_factors_ptr = std::reduce(std::next(std::cbegin(common_factors)), std::cend(common_factors), common_factors.front(), 
+                    [](std::shared_ptr<Node> const &common_factors_ptr, std::shared_ptr<Node> const &common_factor) -> std::shared_ptr<Node> { 
+                        return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ common_factors_ptr, common_factor }));
+                    });
+
+                // [ x, y, z ] = x+y+z
+                std::shared_ptr<Node> uncommon_factors_ptr = std::reduce(std::next(std::cbegin(uncommon_factors)), std::cend(uncommon_factors), uncommon_factors.front(), 
+                    [](std::shared_ptr<Node> const &uncommon_factors_ptr, std::shared_ptr<Node> const &uncommon_factor) -> std::shared_ptr<Node> { 
+                        return std::shared_ptr<AdditionNode>(new AdditionNode({ uncommon_factors_ptr, uncommon_factor }));
+                    });
+
+                return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({
+                    common_factors_ptr,
+                    uncommon_factors_ptr
+                }));
+            }
         }
 
         return node_ptr;

@@ -24,21 +24,25 @@ class ExpressionSimplifier
     std::map<std::string, std::shared_ptr<Node>> m_node_map;
 
 public:
-    ExpressionSimplifier(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map);
+    ExpressionSimplifier(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map = { });
 
+    std::shared_ptr<Node> Simplify();
     std::shared_ptr<Node> Identify();
     std::shared_ptr<Node> Distribute();
     std::shared_ptr<Node> CombineFactors();
     std::shared_ptr<Node> CombineAddends();
+    std::shared_ptr<Node> Factorize();
 
 private:
     std::shared_ptr<Node> Identify(std::shared_ptr<Node> const &node_ptr);
     std::shared_ptr<Node> Distribute(std::shared_ptr<Node> const &node_ptr);
     std::shared_ptr<Node> CombineFactors(std::shared_ptr<Node> const &node_ptr);
     std::shared_ptr<Node> CombineAddends(std::shared_ptr<Node> const &node_ptr);
+    std::shared_ptr<Node> Factorize(std::shared_ptr<Node> const &node_ptr);
 
-    std::vector<std::shared_ptr<Node>> Factors(std::shared_ptr<Node> const &node_ptr);    
-    void Factors(std::vector<std::shared_ptr<Node>> &factors, std::shared_ptr<Node> const &node_ptr);
-    std::vector<std::shared_ptr<Node>> Addends(std::shared_ptr<Node> const &node_ptr);
-    void Addends(std::vector<std::shared_ptr<Node>> &addends, std::shared_ptr<Node> const &node_ptr);
+    static std::vector<std::shared_ptr<Node>> Factors(std::shared_ptr<Node> const &node_ptr);    
+    static std::vector<std::shared_ptr<Node>> Addends(std::shared_ptr<Node> const &node_ptr);
+
+    static void Factors(std::vector<std::shared_ptr<Node>> &factors, std::shared_ptr<Node> const &node_ptr);
+    static void Addends(std::vector<std::shared_ptr<Node>> &addends, std::shared_ptr<Node> const &node_ptr);
 };
