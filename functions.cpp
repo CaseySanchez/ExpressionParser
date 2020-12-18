@@ -157,19 +157,19 @@ std::variant<Matrix, std::complex<double>> ExpNode::Value() const
     return std::visit(Visitor{}, Argument(0)->Value());
 }
 
-LogNode::LogNode(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
+LnNode::LnNode(std::initializer_list<std::shared_ptr<Node>> const &arguments) : Node(arguments)
 {
     if (arguments.size() != 1) {
-        throw std::invalid_argument("LogNode accepts only 1 argument");
+        throw std::invalid_argument("LnNode accepts only 1 argument");
     }
 }
 
-std::string LogNode::Type() const
+std::string LnNode::Type() const
 {
-    return "LogNode";
+    return "LnNode";
 }
 
-std::variant<Matrix, std::complex<double>> LogNode::Value() const
+std::variant<Matrix, std::complex<double>> LnNode::Value() const
 {
     return std::visit(Visitor{}, Argument(0)->Value());
 }

@@ -289,7 +289,7 @@ public:
     std::variant<Matrix, std::complex<double>> Value() const override;
 };
 
-class LogNode : public Node
+class LnNode : public Node
 {
     struct Visitor
     {
@@ -304,7 +304,7 @@ class LogNode : public Node
 
             for (size_t i = 0; i < matrix.Rows(); ++i) {
                 for (size_t j = 0; j < matrix.Cols(); ++j) {
-                    matrix(i, j) = std::shared_ptr<LogNode>(new LogNode({ value(i, j) }));
+                    matrix(i, j) = std::shared_ptr<LnNode>(new LnNode({ value(i, j) }));
                 }
             }
 
@@ -313,7 +313,7 @@ class LogNode : public Node
     };
 
 public:
-    LogNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    LnNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 
@@ -362,29 +362,6 @@ class InverseNode : public Node
 
 public:
     InverseNode(std::initializer_list<std::shared_ptr<Node>> const &arguments);
-
-    std::string Type() const override;
-
-    std::variant<Matrix, std::complex<double>> Value() const override;
-};
-
-class Derivative : public Node
-{
-    struct Visitor
-    {
-        std::variant<Matrix, std::complex<double>> operator()(std::complex<double> const &value)
-        {
-            return value;
-        }
-
-        std::variant<Matrix, std::complex<double>> operator()(Matrix const &value)
-        {
-            return value;
-        }
-    };
-
-public:
-    Derivative(std::initializer_list<std::shared_ptr<Node>> const &arguments);
 
     std::string Type() const override;
 

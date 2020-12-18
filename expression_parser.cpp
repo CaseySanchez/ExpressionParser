@@ -184,7 +184,7 @@ std::shared_ptr<Node> ExpressionParser::Brackets(std::string const &expression_s
 
 std::shared_ptr<Node> ExpressionParser::Functions(std::string const &expression_str)
 {
-    std::regex function_regex("^(.*)(cos|sin|tan|acos|asin|atan|sqrt|abs|exp|log|det|inv)(E_\\d+)(.*?)$|^(.*)(\\\\frac)(E_\\d+)(E_\\d+)(.*?)$");
+    std::regex function_regex("^(.*)(cos|sin|tan|acos|asin|atan|sqrt|abs|exp|ln|det|inv)(E_\\d+)(.*?)$|^(.*)(\\\\frac)(E_\\d+)(E_\\d+)(.*?)$");
 
     std::smatch function_match;
 
@@ -221,8 +221,8 @@ std::shared_ptr<Node> ExpressionParser::Functions(std::string const &expression_
             else if (function_match[2].str() == "exp") {
                 function_ptr = std::shared_ptr<ExpNode>(new ExpNode({ arg_ptr }));
             }
-            else if (function_match[2].str() == "log") {
-                function_ptr = std::shared_ptr<LogNode>(new LogNode({ arg_ptr }));
+            else if (function_match[2].str() == "ln") {
+                function_ptr = std::shared_ptr<LnNode>(new LnNode({ arg_ptr }));
             }
             else if (function_match[2].str() == "det") {
                 function_ptr = std::shared_ptr<DeterminantNode>(new DeterminantNode({ arg_ptr }));
@@ -310,7 +310,7 @@ std::shared_ptr<Node> ExpressionParser::Operators(std::string const &expression_
             std::shared_ptr<Node> arg_ptr = Operators(operator_match[11].str());
 
             return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ std::shared_ptr<ConstantNode>(new ConstantNode(-1.0)), arg_ptr }));
-        } 
+        }
     }
 
     return Nodes(expression_str);

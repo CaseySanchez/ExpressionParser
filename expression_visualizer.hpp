@@ -12,7 +12,7 @@ class ExpressionVisualizer
     std::map<std::string, std::shared_ptr<Node>> m_node_map;
 
 public:
-    ExpressionVisualizer(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map);
+    ExpressionVisualizer(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map = { });
 
     std::string Visualize() const;
     
