@@ -27,9 +27,9 @@ public:
     Calculus(std::variant<Scalar, Matrix> const &node_variant, std::map<std::string, std::variant<Scalar, Matrix>> const &node_map);
 
     Scalar Partial(Scalar const &with_respect_to_ptr);
-    Scalar Partial(Scalar const &scalar, Scalar const &with_respect_to_ptr);
+    Scalar Partial(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_ptr);
 
-    Matrix Gradient(Scalar const &scalar, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr);
-    Scalar Divergence(Matrix const &matrix, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr);
-    Matrix Curl(Matrix const &matrix, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr);
+    Matrix Gradient(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr);
+    Scalar Divergence(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr);
+    Matrix Curl(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr);
 };

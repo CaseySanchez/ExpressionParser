@@ -10,11 +10,17 @@ Calculus::Calculus(std::variant<Scalar, Matrix> const &node_variant, std::map<st
 
 Scalar Calculus::Partial(Scalar const &with_respect_to_ptr)
 {
-    return Partial(std::get<Scalar>(m_node_variant), with_respect_to_ptr);
+    return Partial(m_node_variant, with_respect_to_ptr);
 }
 
-Scalar Calculus::Partial(Scalar const &scalar, Scalar const &with_respect_to_ptr)
+Scalar Calculus::Partial(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_ptr)
 {
+    if (!std::holds_alternative<Scalar>(node_variant)) {
+        throw std::invalid_argument("Partial only defined for Scalar");
+    }
+
+    Scalar scalar = std::get<Scalar>(node_variant);
+
     // d/dx { x } = 1
     if (Node::Equivalent(scalar, with_respect_to_ptr)) {
         return std::shared_ptr<ConstantNode>(new ConstantNode(1.0));
@@ -123,8 +129,14 @@ Scalar Calculus::Partial(Scalar const &scalar, Scalar const &with_respect_to_ptr
     }
 }
 
-Matrix Calculus::Gradient(Scalar const &scalar, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
+Matrix Calculus::Gradient(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
 {
+    if (!std::holds_alternative<Scalar>(node_variant)) {
+        throw std::invalid_argument("Gradient only defined for Scalar");
+    }
+
+    Scalar scalar = std::get<Scalar>(node_variant);
+
     Matrix gradient_matrix(3, 1);
 
     gradient_matrix(0, 0) = Partial(scalar, with_respect_to_x_ptr);
@@ -134,8 +146,14 @@ Matrix Calculus::Gradient(Scalar const &scalar, Scalar const &with_respect_to_x_
     return gradient_matrix;
 }
 
-Scalar Calculus::Divergence(Matrix const &matrix, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
+Scalar Calculus::Divergence(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
 {
+    if (!std::holds_alternative<Matrix>(node_variant)) {
+        throw std::invalid_argument("Divergence only defined for Matrix");
+    }
+
+    Matrix matrix = std::get<Matrix>(node_variant);
+
     if (matrix.Rows() != 3 && matrix.Cols() != 1) {
         throw std::invalid_argument("Divergence requires a 3x1 matrix");
     }
@@ -149,8 +167,14 @@ Scalar Calculus::Divergence(Matrix const &matrix, Scalar const &with_respect_to_
     }));
 }
 
-Matrix Calculus::Curl(Matrix const &matrix, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
+Matrix Calculus::Curl(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
 {
+    if (!std::holds_alternative<Matrix>(node_variant)) {
+        throw std::invalid_argument("Curl only defined for Matrix");
+    }
+
+    Matrix matrix = std::get<Matrix>(node_variant);
+
     if (matrix.Rows() != 3 && matrix.Cols() != 1) {
         throw std::invalid_argument("Divergence requires a 3x1 matrix");
     }
