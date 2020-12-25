@@ -4,30 +4,30 @@
 
 #include "node.hpp"
 
-Node::Node(std::variant<Matrix, std::complex<double>> const &value) : m_value(value)
+Node::Node(std::complex<double> const &value) : m_value(value)
 {
 }
 
-Node::Node(std::initializer_list<std::shared_ptr<Node>> const &arguments) : m_arguments(arguments)
+Node::Node(std::initializer_list<Scalar> const &arguments) : m_arguments(arguments)
 {
 }
 
-std::shared_ptr<Node> &Node::Argument(size_t const &index)
-{
-    return m_arguments.at(index);
-}
-
-std::shared_ptr<Node> Node::Argument(size_t const &index) const
+Scalar &Node::Argument(size_t const &index)
 {
     return m_arguments.at(index);
 }
 
-std::vector<std::shared_ptr<Node>> &Node::Arguments()
+Scalar Node::Argument(size_t const &index) const
+{
+    return m_arguments.at(index);
+}
+
+std::vector<Scalar> &Node::Arguments()
 {
     return m_arguments;
 }
 
-std::vector<std::shared_ptr<Node>> Node::Arguments() const
+std::vector<Scalar> Node::Arguments() const
 {
     return m_arguments;
 }
@@ -37,61 +37,33 @@ std::string Node::Type() const
     return "Node";
 }
 
-std::variant<Matrix, std::complex<double>> Node::Value() const
+std::complex<double> Node::Value() const
 {
     return m_value;
 }
 
-std::complex<double> Node::ComplexValue() const
-{
-    return std::get<std::complex<double>>(Value());
-}
-
-Matrix Node::MatrixValue() const
-{
-    return std::get<Matrix>(Value());
-}
-
-bool Node::Equivalent(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr)
+bool Node::Equivalent(Scalar const &lhs_ptr, Scalar const &rhs_ptr)
 { 
     if (lhs_ptr->Type() == rhs_ptr->Type()) {
-        if (lhs_ptr->Type() == "MatrixNode") {
-            Matrix lhs_matrix = lhs_ptr->MatrixValue();
-            Matrix rhs_matrix = rhs_ptr->MatrixValue();
+        std::vector<Scalar> lhs_args = lhs_ptr->Arguments();
+        std::vector<Scalar> rhs_args = rhs_ptr->Arguments();
 
-            if (lhs_matrix.Rows() == rhs_matrix.Rows() && lhs_matrix.Cols() == rhs_matrix.Cols()) {
-                for (size_t i = 0; i < lhs_matrix.Rows(); ++i) {
-                    for (size_t j = 0; j < lhs_matrix.Cols(); ++j) {
-                        if (!Node::Equivalent(lhs_matrix(i, j), rhs_matrix(i, j))) {
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
+        if (lhs_args.size() == 0) {
+            if (lhs_ptr->Type() == "VariableNode") {
+                return lhs_ptr == rhs_ptr;
+            }
+            else if (lhs_ptr->Type() == "ConstantNode") {
+                return Approximately(lhs_ptr->Value(), rhs_ptr->Value());
             }
         }
         else {
-            std::vector<std::shared_ptr<Node>> lhs_args = lhs_ptr->Arguments();
-            std::vector<std::shared_ptr<Node>> rhs_args = rhs_ptr->Arguments();
-
-            if (lhs_args.size() == 0) {
-                if (lhs_ptr->Type() == "VariableNode") {
-                    return lhs_ptr == rhs_ptr;
-                }
-                else if (lhs_ptr->Type() == "ConstantNode") {
-                    return Approximately(lhs_ptr->ComplexValue(), rhs_ptr->ComplexValue());
+            for (auto lhs_arg : lhs_args) {
+                if (std::find_if(std::cbegin(rhs_args), std::cend(rhs_args), [&lhs_arg](Scalar const &rhs_arg) -> bool { return Node::Equivalent(lhs_arg, rhs_arg); }) == std::cend(rhs_args)) {
+                    return false;
                 }
             }
-            else {
-                for (auto lhs_arg : lhs_args) {
-                    if (std::find_if(std::cbegin(rhs_args), std::cend(rhs_args), [&lhs_arg](std::shared_ptr<Node> const &rhs_arg) -> bool { return Node::Equivalent(lhs_arg, rhs_arg); }) == std::cend(rhs_args)) {
-                        return false;
-                    }
-                }
 
-                return true;
-            }
+            return true;
         }
     }
     
@@ -100,34 +72,27 @@ bool Node::Equivalent(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node
 
 std::ostream &operator<<(std::ostream &ostream, Node const &node)
 {
-    auto value = node.Value();
+    std::complex<double> complex = node.Value();
 
-    if (std::holds_alternative<std::complex<double>>(value)) {
-        std::complex<double> complex = std::get<std::complex<double>>(value);
-
-        if (!Approximately(complex.real(), 0.0) && !Approximately(complex.imag(), 0.0)) {
-            ostream << complex.real() << (complex.imag() > 0.0 ? "+" : "") << complex.imag() << "i";
-        }
-        else if(!Approximately(complex.real(), 0.0)) {
-            ostream << complex.real();
-        }
-        else if(!Approximately(complex.imag(), 0.0)) {
-            ostream << complex.imag() << "i";
-        }
-        else {
-            ostream << 0.0;
-        }
+    if (!Approximately(complex.real(), 0.0) && !Approximately(complex.imag(), 0.0)) {
+        ostream << complex.real() << (complex.imag() > 0.0 ? "+" : "") << complex.imag() << "i";
     }
-    else if (std::holds_alternative<Matrix>(value)) {
-        ostream << std::get<Matrix>(value);
+    else if(!Approximately(complex.real(), 0.0)) {
+        ostream << complex.real();
+    }
+    else if(!Approximately(complex.imag(), 0.0)) {
+        ostream << complex.imag() << "i";
+    }
+    else {
+        ostream << 0.0;
     }
 
     return ostream;
 }
 
-std::ostream &operator<<(std::ostream &ostream, std::shared_ptr<Node> const &node_ptr)
+std::ostream &operator<<(std::ostream &ostream, Scalar const &scalar)
 {
-    ostream << *node_ptr;
+    ostream << *scalar;
 
     return ostream;
 }
@@ -155,13 +120,4 @@ ConstantNode::ConstantNode(std::complex<double> const &value) : Node(value)
 std::string ConstantNode::Type() const
 {
     return "ConstantNode";
-}
-
-MatrixNode::MatrixNode(Matrix const &value) : Node(value)
-{
-}
-
-std::string MatrixNode::Type() const
-{
-    return "MatrixNode";
 }

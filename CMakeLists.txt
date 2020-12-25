@@ -8,21 +8,21 @@ option(BUILD_AWS "Build the AWS Lambda project")
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(ExpressionParser SHARED node.cpp operations.cpp functions.cpp matrix.cpp expression_parser.cpp expression_composer.cpp expression_simplifier.cpp equation_parser.cpp complex_parser.cpp expression_visualizer.cpp calculus.cpp utils.cpp)
+add_library(ExpressionParser SHARED node.cpp operations.cpp functions.cpp matrix.cpp expression_parser.cpp complex_parser.cpp expression_composer.cpp equation_parser.cpp expression_simplifier.cpp expression_visualizer.cpp utils.cpp calculus.cpp)
 
 set_target_properties(ExpressionParser PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES CXX_EXTENSIONS NO)
 
 link_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
 
-if (${BUILD_EXAMPLES})
+if (BUILD_EXAMPLES)
     add_subdirectory(Examples)
 endif()
 
-if (${BUILD_TESTS})
+if (BUILD_TESTS)
     add_subdirectory(Test)
 endif()
 
-if (${BUILD_AWS})
-    add_subdirectory(AWS)
-endif()
+#if (${BUILD_AWS})
+#    add_subdirectory(AWS)
+#endif()

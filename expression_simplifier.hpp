@@ -13,36 +13,37 @@
 #include <functional>
 
 #include "node.hpp"
+
+#include "matrix.hpp"
 #include "operations.hpp"
 #include "functions.hpp"
 #include "utils.hpp"
-#include "expression_visualizer.hpp"
 
 class ExpressionSimplifier
 {
-    std::shared_ptr<Node> m_node_ptr;
-    std::map<std::string, std::shared_ptr<Node>> m_node_map;
+    std::variant<Scalar, Matrix> m_node_variant;
+    std::map<std::string, std::variant<Scalar, Matrix>> m_node_map;
 
 public:
-    ExpressionSimplifier(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map = { });
+    ExpressionSimplifier(std::variant<Scalar, Matrix> const &node_variant, std::map<std::string, std::variant<Scalar, Matrix>> const &node_map = { });
 
-    std::shared_ptr<Node> Simplify();
-    std::shared_ptr<Node> Identify();
-    std::shared_ptr<Node> Distribute();
-    std::shared_ptr<Node> CombineFactors();
-    std::shared_ptr<Node> CombineAddends();
-    std::shared_ptr<Node> Factorize();
+    std::variant<Scalar, Matrix> Simplify();
+    std::variant<Scalar, Matrix> Identify();
+    std::variant<Scalar, Matrix> Distribute();
+    std::variant<Scalar, Matrix> CombineFactors();
+    std::variant<Scalar, Matrix> CombineAddends();
+    std::variant<Scalar, Matrix> Factorize();
 
 private:
-    std::shared_ptr<Node> Identify(std::shared_ptr<Node> const &node_ptr);
-    std::shared_ptr<Node> Distribute(std::shared_ptr<Node> const &node_ptr);
-    std::shared_ptr<Node> CombineFactors(std::shared_ptr<Node> const &node_ptr);
-    std::shared_ptr<Node> CombineAddends(std::shared_ptr<Node> const &node_ptr);
-    std::shared_ptr<Node> Factorize(std::shared_ptr<Node> const &node_ptr);
+    std::variant<Scalar, Matrix> Identify(std::variant<Scalar, Matrix> const &node_variant);
+    std::variant<Scalar, Matrix> Distribute(std::variant<Scalar, Matrix> const &node_variant);
+    std::variant<Scalar, Matrix> CombineFactors(std::variant<Scalar, Matrix> const &node_variant);
+    std::variant<Scalar, Matrix> CombineAddends(std::variant<Scalar, Matrix> const &node_variant);
+    std::variant<Scalar, Matrix> Factorize(std::variant<Scalar, Matrix> const &node_variant);
 
-    static std::vector<std::shared_ptr<Node>> Factors(std::shared_ptr<Node> const &node_ptr);    
-    static std::vector<std::shared_ptr<Node>> Addends(std::shared_ptr<Node> const &node_ptr);
+    static std::vector<Scalar> Factors(Scalar const &node_scalar);    
+    static std::vector<Scalar> Addends(Scalar const &node_scalar);
 
-    static void Factors(std::vector<std::shared_ptr<Node>> &factors, std::shared_ptr<Node> const &node_ptr);
-    static void Addends(std::vector<std::shared_ptr<Node>> &addends, std::shared_ptr<Node> const &node_ptr);
+    static void Factors(std::vector<Scalar> &factors, Scalar const &node_scalar);
+    static void Addends(std::vector<Scalar> &addends, Scalar const &node_scalar);
 };

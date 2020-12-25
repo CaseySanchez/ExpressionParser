@@ -4,120 +4,118 @@
 
 #include "calculus.hpp"
 
-Calculus::Calculus(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map) : m_node_ptr(node_ptr), m_node_map(node_map)
+Calculus::Calculus(std::variant<Scalar, Matrix> const &node_variant, std::map<std::string, std::variant<Scalar, Matrix>> const &node_map) : m_node_variant(node_variant), m_node_map(node_map)
 {
 }
 
-std::shared_ptr<Node> Calculus::Partial(std::shared_ptr<Node> const &with_respect_to_ptr)
+Scalar Calculus::Partial(Scalar const &with_respect_to_ptr)
 {
-    return Partial(m_node_ptr, with_respect_to_ptr);
+    return Partial(std::get<Scalar>(m_node_variant), with_respect_to_ptr);
 }
 
-std::shared_ptr<Node> Calculus::Partial(std::shared_ptr<Node> const &node_ptr, std::shared_ptr<Node> const &with_respect_to_ptr)
+Scalar Calculus::Partial(Scalar const &scalar, Scalar const &with_respect_to_ptr)
 {
-    std::cout << ExpressionVisualizer(node_ptr, m_node_map) << std::endl;
-
     // d/dx { x } = 1
-    if (Node::Equivalent(node_ptr, with_respect_to_ptr)) {
+    if (Node::Equivalent(scalar, with_respect_to_ptr)) {
         return std::shared_ptr<ConstantNode>(new ConstantNode(1.0));
     }
     // d/dx { 1 } = 0
-    else if (node_ptr->Type() == "ConstantNode") {
+    else if (scalar->Type() == "ConstantNode") {
         return std::shared_ptr<ConstantNode>(new ConstantNode(0.0));
     }
     // d/dx { y } = 0
-    else if (node_ptr->Type() == "VariableNode") {
+    else if (scalar->Type() == "VariableNode") {
         return std::shared_ptr<ConstantNode>(new ConstantNode(0.0));
     }
     // d/dx { f(x) + g(x) } = f'(x) + g'(x)
-    else if (node_ptr->Type() == "AdditionNode") {
+    else if (scalar->Type() == "AdditionNode") {
         return std::shared_ptr<AdditionNode>(new AdditionNode({
-            Partial(node_ptr->Argument(0), with_respect_to_ptr),
-            Partial(node_ptr->Argument(1), with_respect_to_ptr)
+            Partial(scalar->Argument(0), with_respect_to_ptr),
+            Partial(scalar->Argument(1), with_respect_to_ptr)
         }));
     }
     // d/dx { f(x) - g(x) } = f'(x) - g'(x)
-    else if (node_ptr->Type() == "SubtractionNode") {
+    else if (scalar->Type() == "SubtractionNode") {
         return std::shared_ptr<SubtractionNode>(new SubtractionNode({
-            Partial(node_ptr->Argument(0), with_respect_to_ptr),
-            Partial(node_ptr->Argument(1), with_respect_to_ptr)
+            Partial(scalar->Argument(0), with_respect_to_ptr),
+            Partial(scalar->Argument(1), with_respect_to_ptr)
         }));
     }
     // d/dx { f(x) * g(x) } = f'(x) * g(x) + g'(x) * f(x)
-    else if (node_ptr->Type() == "MultiplicationNode") {
+    else if (scalar->Type() == "MultiplicationNode") {
         return std::shared_ptr<AdditionNode>(new AdditionNode({
             std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ 
-                Partial(node_ptr->Argument(0), with_respect_to_ptr),
-                node_ptr->Argument(1)
+                Partial(scalar->Argument(0), with_respect_to_ptr),
+                scalar->Argument(1)
             })),
             std::shared_ptr<MultiplicationNode>(new MultiplicationNode({
-                Partial(node_ptr->Argument(1), with_respect_to_ptr),
-                node_ptr->Argument(0)
+                Partial(scalar->Argument(1), with_respect_to_ptr),
+                scalar->Argument(0)
             }))
         }));
     }
     // d/dx { f(x) / g(x) } = { f'(x) * g(x) - g'(x) * f(x) } / { g(x) }^2
-    else if (node_ptr->Type() == "DivisionNode") {
+    else if (scalar->Type() == "DivisionNode") {
         return std::shared_ptr<DivisionNode>(new DivisionNode({
             std::shared_ptr<SubtractionNode>(new SubtractionNode({
                 std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ 
-                    Partial(node_ptr->Argument(0), with_respect_to_ptr),
-                    node_ptr->Argument(1)
+                    Partial(scalar->Argument(0), with_respect_to_ptr),
+                    scalar->Argument(1)
                 })),
                 std::shared_ptr<MultiplicationNode>(new MultiplicationNode({
-                    Partial(node_ptr->Argument(1), with_respect_to_ptr),
-                    node_ptr->Argument(0)
+                    Partial(scalar->Argument(1), with_respect_to_ptr),
+                    scalar->Argument(0)
                 }))
             })),
             std::shared_ptr<ExponentiationNode>(new ExponentiationNode({
-                node_ptr->Argument(1),
+                scalar->Argument(1),
                 std::shared_ptr<ConstantNode>(new ConstantNode(2.0))
             }))
         }));
     }
     // d/dx { x^2 } = d/dx { e^{ ln(x) * 2 } } = e^{ ln(x) * 2 } * d/dx { ln(x) * 2 } = 2 * x^2 * x^{-1} = 2 * x
-    else if (node_ptr->Type() == "ExponentiationNode") {
+    else if (scalar->Type() == "ExponentiationNode") {
         return Partial(std::shared_ptr<ExpNode>(new ExpNode({
                 std::shared_ptr<MultiplicationNode>(new MultiplicationNode({ 
-                    std::shared_ptr<LnNode>(new LnNode({ node_ptr->Argument(0) })),
-                    node_ptr->Argument(1)
+                    std::shared_ptr<LnNode>(new LnNode({ scalar->Argument(0) })),
+                    scalar->Argument(1)
                 }))
             })), with_respect_to_ptr);
     }
     // d/dx { e^{ x^2 } } = e^{ x^2 } * d/dx { x^2 } = e^{ x^2 } * 2 * x
-    else if (node_ptr->Type() == "ExpNode") {
+    else if (scalar->Type() == "ExpNode") {
         return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({
-            node_ptr,
-            Partial(node_ptr->Argument(0), with_respect_to_ptr)
+            scalar,
+            Partial(scalar->Argument(0), with_respect_to_ptr)
         }));
     }
     // d/dx { ln { x^2 } } = { x^2 }^{-1} * d/dx { x^2 } = 2 * x * x^{-2} = 2 * x^{-1}
-    else if (node_ptr->Type() == "LnNode") {
+    else if (scalar->Type() == "LnNode") {
         return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({
             std::shared_ptr<ExponentiationNode>(new ExponentiationNode({
-                node_ptr->Argument(0),
+                scalar->Argument(0),
                 std::shared_ptr<ConstantNode>(new ConstantNode(-1.0))
             })),
-            Partial(node_ptr->Argument(0), with_respect_to_ptr)
+            Partial(scalar->Argument(0), with_respect_to_ptr)
         }));
     }
-    else if (node_ptr->Type() == "SinNode") {
+    else if (scalar->Type() == "SinNode") {
         return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({
             std::shared_ptr<CosNode>(new CosNode({
-                node_ptr->Argument(0)
+                scalar->Argument(0)
             })),
-            Partial(node_ptr->Argument(0), with_respect_to_ptr)
+            Partial(scalar->Argument(0), with_respect_to_ptr)
         }));
     }
-    else if (node_ptr->Type() == "CosNode") {
+    else if (scalar->Type() == "CosNode") {
         return std::shared_ptr<MultiplicationNode>(new MultiplicationNode({
             std::shared_ptr<MultiplicationNode>(new MultiplicationNode({
                 std::shared_ptr<ConstantNode>(new ConstantNode(-1.0)),
                 std::shared_ptr<SinNode>(new SinNode({
-                    node_ptr->Argument(0)
+                    scalar->Argument(0)
                 }))
             })),
-            Partial(node_ptr->Argument(0), with_respect_to_ptr)
+            Partial(scalar->Argument(0), with_respect_to_ptr)
         }));
     }
     else {
@@ -125,27 +123,19 @@ std::shared_ptr<Node> Calculus::Partial(std::shared_ptr<Node> const &node_ptr, s
     }
 }
 
-std::shared_ptr<Node> Calculus::Gradient(std::shared_ptr<Node> const &node_ptr, std::shared_ptr<Node> const &with_respect_to_x_ptr, std::shared_ptr<Node> const &with_respect_to_y_ptr, std::shared_ptr<Node> const &with_respect_to_z_ptr)
+Matrix Calculus::Gradient(Scalar const &scalar, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
 {
     Matrix gradient_matrix(3, 1);
 
-    gradient_matrix(0, 0) = Partial(node_ptr, with_respect_to_x_ptr);
-    gradient_matrix(1, 0) = Partial(node_ptr, with_respect_to_y_ptr);
-    gradient_matrix(2, 0) = Partial(node_ptr, with_respect_to_z_ptr);
+    gradient_matrix(0, 0) = Partial(scalar, with_respect_to_x_ptr);
+    gradient_matrix(1, 0) = Partial(scalar, with_respect_to_y_ptr);
+    gradient_matrix(2, 0) = Partial(scalar, with_respect_to_z_ptr);
 
-    return std::shared_ptr<MatrixNode>(new MatrixNode(gradient_matrix));
+    return gradient_matrix;
 }
 
-std::shared_ptr<Node> Calculus::Divergence(std::shared_ptr<Node> const &node_ptr, std::shared_ptr<Node> const &with_respect_to_x_ptr, std::shared_ptr<Node> const &with_respect_to_y_ptr, std::shared_ptr<Node> const &with_respect_to_z_ptr)
+Scalar Calculus::Divergence(Matrix const &matrix, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
 {
-    if (node_ptr->Type() != "MatrixNode") {
-        throw std::invalid_argument("Divergence requires a MatrixNode");
-    }
-
-    std::shared_ptr<MatrixNode> matrix_ptr = std::dynamic_pointer_cast<MatrixNode>(node_ptr);
-
-    Matrix matrix = matrix_ptr->MatrixValue();
-
     if (matrix.Rows() != 3 && matrix.Cols() != 1) {
         throw std::invalid_argument("Divergence requires a 3x1 matrix");
     }
@@ -159,18 +149,10 @@ std::shared_ptr<Node> Calculus::Divergence(std::shared_ptr<Node> const &node_ptr
     }));
 }
 
-std::shared_ptr<Node> Calculus::Curl(std::shared_ptr<Node> const &node_ptr, std::shared_ptr<Node> const &with_respect_to_x_ptr, std::shared_ptr<Node> const &with_respect_to_y_ptr, std::shared_ptr<Node> const &with_respect_to_z_ptr)
+Matrix Calculus::Curl(Matrix const &matrix, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
 {
-    if (node_ptr->Type() != "MatrixNode") {
-        throw std::invalid_argument("Curl requires a MatrixNode");
-    }
-
-    std::shared_ptr<MatrixNode> matrix_ptr = std::dynamic_pointer_cast<MatrixNode>(node_ptr);
-
-    Matrix matrix = matrix_ptr->MatrixValue();
-
     if (matrix.Rows() != 3 && matrix.Cols() != 1) {
-        throw std::invalid_argument("Curl requires a 3x1 matrix");
+        throw std::invalid_argument("Divergence requires a 3x1 matrix");
     }
 
     Matrix curl_matrix(3, 1);
@@ -179,5 +161,5 @@ std::shared_ptr<Node> Calculus::Curl(std::shared_ptr<Node> const &node_ptr, std:
     curl_matrix(1, 0) = std::shared_ptr<SubtractionNode>(new SubtractionNode({ Partial(matrix(0, 0), with_respect_to_z_ptr), Partial(matrix(2, 0), with_respect_to_x_ptr) }));
     curl_matrix(2, 0) = std::shared_ptr<SubtractionNode>(new SubtractionNode({ Partial(matrix(1, 0), with_respect_to_x_ptr), Partial(matrix(0, 0), with_respect_to_y_ptr) }));
 
-    return std::shared_ptr<MatrixNode>(new MatrixNode(curl_matrix));
+    return curl_matrix;
 }
