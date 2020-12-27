@@ -18,7 +18,6 @@
 #include "functions.hpp"
 #include "utils.hpp"
 #include "matrix.hpp"
-#include "visitors.hpp"
 #include "complex_parser.hpp"
 
 class ExpressionParserContext
@@ -69,4 +68,105 @@ private:
     std::variant<Scalar, Matrix> Functions(std::string const &expression_str);
     std::variant<Scalar, Matrix> Operators(std::string const &expression_str);
     std::variant<Scalar, Matrix> Nodes(std::string const &expression_str);
+
+private:    
+    struct AdditionVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &lhs, Scalar const &rhs);
+        std::variant<Scalar, Matrix> operator()(Scalar const &lhs, Matrix const &rhs);
+        std::variant<Scalar, Matrix> operator()(Matrix const &lhs, Scalar const &rhs);
+        std::variant<Scalar, Matrix> operator()(Matrix const &lhs, Matrix const &rhs);
+    };
+
+    struct SubtractionVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &lhs, Scalar const &rhs);
+        std::variant<Scalar, Matrix> operator()(Scalar const &lhs, Matrix const &rhs);
+        std::variant<Scalar, Matrix> operator()(Matrix const &lhs, Scalar const &rhs);
+        std::variant<Scalar, Matrix> operator()(Matrix const &lhs, Matrix const &rhs);
+    };
+
+    struct MultiplicationVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &lhs, Scalar const &rhs);
+        std::variant<Scalar, Matrix> operator()(Scalar const &lhs, Matrix const &rhs);
+        std::variant<Scalar, Matrix> operator()(Matrix const &lhs, Scalar const &rhs);
+        std::variant<Scalar, Matrix> operator()(Matrix const &lhs, Matrix const &rhs);
+    };
+
+    struct DivisionVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &lhs, Scalar const &rhs);
+        std::variant<Scalar, Matrix> operator()(Scalar const &lhs, Matrix const &rhs);
+        std::variant<Scalar, Matrix> operator()(Matrix const &lhs, Scalar const &rhs);
+        std::variant<Scalar, Matrix> operator()(Matrix const &lhs, Matrix const &rhs);
+    };
+
+    struct ExponentiationVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &lhs, Scalar const &rhs);
+        std::variant<Scalar, Matrix> operator()(Scalar const &lhs, Matrix const &rhs);
+        std::variant<Scalar, Matrix> operator()(Matrix const &lhs, Scalar const &rhs);
+        std::variant<Scalar, Matrix> operator()(Matrix const &lhs, Matrix const &rhs);
+    };
+
+    struct CosVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct SinVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct TanVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct AcosVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct AsinVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct AtanVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct SqrtVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct AbsVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct ExpVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct LnVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
 };

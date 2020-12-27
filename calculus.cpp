@@ -129,7 +129,12 @@ Scalar Calculus::Partial(std::variant<Scalar, Matrix> const &node_variant, Scala
     }
 }
 
-Matrix Calculus::Gradient(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
+Matrix Calculus::Gradient(Scalar const &with_respect_to_11_ptr, Scalar const &with_respect_to_21_ptr, Scalar const &with_respect_to_31_ptr)
+{
+    return Gradient(m_node_variant, with_respect_to_11_ptr, with_respect_to_21_ptr, with_respect_to_31_ptr);
+}
+
+Matrix Calculus::Gradient(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_11_ptr, Scalar const &with_respect_to_21_ptr, Scalar const &with_respect_to_31_ptr)
 {
     if (!std::holds_alternative<Scalar>(node_variant)) {
         throw std::invalid_argument("Gradient only defined for Scalar");
@@ -139,14 +144,19 @@ Matrix Calculus::Gradient(std::variant<Scalar, Matrix> const &node_variant, Scal
 
     Matrix gradient_matrix(3, 1);
 
-    gradient_matrix(0, 0) = Partial(scalar, with_respect_to_x_ptr);
-    gradient_matrix(1, 0) = Partial(scalar, with_respect_to_y_ptr);
-    gradient_matrix(2, 0) = Partial(scalar, with_respect_to_z_ptr);
+    gradient_matrix(0, 0) = Partial(scalar, with_respect_to_11_ptr);
+    gradient_matrix(1, 0) = Partial(scalar, with_respect_to_21_ptr);
+    gradient_matrix(2, 0) = Partial(scalar, with_respect_to_31_ptr);
 
     return gradient_matrix;
 }
 
-Scalar Calculus::Divergence(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
+Scalar Calculus::Divergence(Scalar const &with_respect_to_11_ptr, Scalar const &with_respect_to_21_ptr, Scalar const &with_respect_to_31_ptr)
+{
+    return Divergence(m_node_variant, with_respect_to_11_ptr, with_respect_to_21_ptr, with_respect_to_31_ptr);
+}
+
+Scalar Calculus::Divergence(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_11_ptr, Scalar const &with_respect_to_21_ptr, Scalar const &with_respect_to_31_ptr)
 {
     if (!std::holds_alternative<Matrix>(node_variant)) {
         throw std::invalid_argument("Divergence only defined for Matrix");
@@ -160,14 +170,19 @@ Scalar Calculus::Divergence(std::variant<Scalar, Matrix> const &node_variant, Sc
 
     return std::shared_ptr<AdditionNode>(new AdditionNode({
         std::shared_ptr<AdditionNode>(new AdditionNode({
-            Partial(matrix(0, 0), with_respect_to_x_ptr),
-            Partial(matrix(1, 0), with_respect_to_y_ptr)
+            Partial(matrix(0, 0), with_respect_to_11_ptr),
+            Partial(matrix(1, 0), with_respect_to_21_ptr)
         })),
-        Partial(matrix(2, 0), with_respect_to_z_ptr) 
+        Partial(matrix(2, 0), with_respect_to_31_ptr) 
     }));
 }
 
-Matrix Calculus::Curl(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_x_ptr, Scalar const &with_respect_to_y_ptr, Scalar const &with_respect_to_z_ptr)
+Matrix Calculus::Curl(Scalar const &with_respect_to_11_ptr, Scalar const &with_respect_to_21_ptr, Scalar const &with_respect_to_31_ptr)
+{
+    return Curl(m_node_variant, with_respect_to_11_ptr, with_respect_to_21_ptr, with_respect_to_31_ptr);
+}
+
+Matrix Calculus::Curl(std::variant<Scalar, Matrix> const &node_variant, Scalar const &with_respect_to_11_ptr, Scalar const &with_respect_to_21_ptr, Scalar const &with_respect_to_31_ptr)
 {
     if (!std::holds_alternative<Matrix>(node_variant)) {
         throw std::invalid_argument("Curl only defined for Matrix");
@@ -181,9 +196,9 @@ Matrix Calculus::Curl(std::variant<Scalar, Matrix> const &node_variant, Scalar c
 
     Matrix curl_matrix(3, 1);
 
-    curl_matrix(0, 0) = std::shared_ptr<SubtractionNode>(new SubtractionNode({ Partial(matrix(2, 0), with_respect_to_y_ptr), Partial(matrix(1, 0), with_respect_to_z_ptr) }));
-    curl_matrix(1, 0) = std::shared_ptr<SubtractionNode>(new SubtractionNode({ Partial(matrix(0, 0), with_respect_to_z_ptr), Partial(matrix(2, 0), with_respect_to_x_ptr) }));
-    curl_matrix(2, 0) = std::shared_ptr<SubtractionNode>(new SubtractionNode({ Partial(matrix(1, 0), with_respect_to_x_ptr), Partial(matrix(0, 0), with_respect_to_y_ptr) }));
+    curl_matrix(0, 0) = std::shared_ptr<SubtractionNode>(new SubtractionNode({ Partial(matrix(2, 0), with_respect_to_21_ptr), Partial(matrix(1, 0), with_respect_to_31_ptr) }));
+    curl_matrix(1, 0) = std::shared_ptr<SubtractionNode>(new SubtractionNode({ Partial(matrix(0, 0), with_respect_to_31_ptr), Partial(matrix(2, 0), with_respect_to_11_ptr) }));
+    curl_matrix(2, 0) = std::shared_ptr<SubtractionNode>(new SubtractionNode({ Partial(matrix(1, 0), with_respect_to_11_ptr), Partial(matrix(0, 0), with_respect_to_21_ptr) }));
 
     return curl_matrix;
 }
