@@ -14,36 +14,36 @@
 #include <algorithm>
 #include <numeric>
 
-#include "matrix.hpp"
 #include "utils.hpp"
+
+class Node;
+
+using Scalar = std::shared_ptr<Node>;
 
 class Node
 {    
 protected:
-    std::variant<Matrix, std::complex<double>> m_value;
-    std::vector<std::shared_ptr<Node>> m_arguments;
+    std::complex<double> m_value;
+    std::vector<Scalar> m_arguments;
 
 public:
-    Node(std::variant<Matrix, std::complex<double>> const &value = 0.0);
-    Node(std::initializer_list<std::shared_ptr<Node>> const &arguments);
+    Node(std::complex<double> const &value = 0.0);
+    Node(std::initializer_list<Scalar> const &arguments);
 
-    std::shared_ptr<Node> &Argument(size_t const &index);
-    std::shared_ptr<Node> Argument(size_t const &index) const;
-    std::vector<std::shared_ptr<Node>> &Arguments();
-    std::vector<std::shared_ptr<Node>> Arguments() const;
+    Scalar &Argument(size_t const &index);
+    Scalar Argument(size_t const &index) const;
+    std::vector<Scalar> &Arguments();
+    std::vector<Scalar> Arguments() const;
 
     virtual std::string Type() const;
 
-    virtual std::variant<Matrix, std::complex<double>> Value() const;
-
-    std::complex<double> ComplexValue() const;
-    Matrix MatrixValue() const;
+    virtual std::complex<double> Value() const;
 
 public:
-    static bool Equivalent(std::shared_ptr<Node> const &lhs_ptr, std::shared_ptr<Node> const &rhs_ptr);
+    static bool Equivalent(Scalar const &lhs_ptr, Scalar const &rhs_ptr);
 
     friend std::ostream &operator<<(std::ostream &ostream, Node const &node);
-    friend std::ostream &operator<<(std::ostream &ostream, std::shared_ptr<Node> const &node_ptr);
+    friend std::ostream &operator<<(std::ostream &ostream, Scalar const &scalar);
 };
 
 class VariableNode : public Node
@@ -64,12 +64,4 @@ public:
     std::string Type() const override;
 
     Node &operator=(Node const &node) = delete;
-};
-
-class MatrixNode : public Node
-{
-public:
-    MatrixNode(Matrix const &value);
-
-    std::string Type() const override;
 };

@@ -16,19 +16,19 @@
 
 class ExpressionComposer
 {
-    std::shared_ptr<Node> m_node_ptr;
+    std::variant<Scalar, Matrix> m_node_variant;
 
-    std::map<std::string, std::shared_ptr<Node>> m_node_map;
+    std::map<std::string, std::variant<Scalar, Matrix>> m_node_map;
 
 public:
-    ExpressionComposer(std::shared_ptr<Node> const &node_ptr, std::map<std::string, std::shared_ptr<Node>> const &node_map = { });
+    ExpressionComposer(std::variant<Scalar, Matrix> const &node_variant, std::map<std::string, std::variant<Scalar, Matrix>> const &node_map = { });
 
     std::string Compose() const;
 
     void Compose(std::ostream &ostream) const;
 
 private:
-    void Compose(std::ostream &ostream, std::shared_ptr<Node> const &node_ptr, uint32_t const &precedence = ~0) const;
+    void Compose(std::ostream &ostream, std::variant<Scalar, Matrix> const &node_variant, uint32_t const &precedence = ~0) const;
 
 public:
     friend std::ostream &operator<<(std::ostream &ostream, ExpressionComposer const &expression_composer);
