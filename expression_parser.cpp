@@ -185,7 +185,7 @@ std::variant<Scalar, Matrix> ExpressionParser::Brackets(std::string const &expre
 
 std::variant<Scalar, Matrix> ExpressionParser::Functions(std::string const &expression_str)
 {
-    std::regex function_regex("^(.*)(cos|sin|tan|acos|asin|atan|sqrt|abs|exp|ln)(E_\\d+)(.*?)$|^(.*)(\\\\frac)(E_\\d+)(E_\\d+)(.*?)$");
+    std::regex function_regex("^(.*)(cos|sin|tan|acos|asin|atan|sqrt|abs|exp|ln|det|inv)(E_\\d+)(.*?)$|^(.*)(\\\\frac)(E_\\d+)(E_\\d+)(.*?)$");
 
     std::smatch function_match;
 
@@ -224,6 +224,12 @@ std::variant<Scalar, Matrix> ExpressionParser::Functions(std::string const &expr
             }
             else if (function_match[2].str() == "ln") {
                 function_variant = std::visit(LnVisitor{ }, arg_variant);
+            }
+            else if (function_match[2].str() == "det") {
+                function_variant = std::visit(DeterminantVisitor{ }, arg_variant);
+            }
+            else if (function_match[2].str() == "inv") {
+                function_variant = std::visit(InverseVisitor{ }, arg_variant);
             }
             else {
                 throw std::invalid_argument("Unrecognized function: " + function_match[2].str());
@@ -706,4 +712,72 @@ std::variant<Scalar, Matrix> ExpressionParser::LnVisitor::operator()(Matrix cons
     }
     
     return matrix;
+}
+
+ExpressionParser::SubmatrixVisitor::SubmatrixVisitor(size_t const &row, size_t const &col) : m_row(row), m_col(col)
+{
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::SubmatrixVisitor::operator()(Scalar const &arg)
+{
+    throw std::invalid_argument("SubmatrixVisitor unrecognized argument Scalar");
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::SubmatrixVisitor::operator()(Matrix const &arg)
+{
+    return arg.Submatrix(m_row, m_col);
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::TransposeVisitor::operator()(Scalar const &arg)
+{
+    throw std::invalid_argument("TransposeVisitor unrecognized argument Scalar");
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::TransposeVisitor::operator()(Matrix const &arg)
+{
+    return arg.Transpose();
+}
+
+ExpressionParser::MinorVisitor::MinorVisitor(size_t const &row, size_t const &col) : m_row(row), m_col(col)
+{
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::MinorVisitor::operator()(Scalar const &arg)
+{
+    throw std::invalid_argument("MinorVisitor unrecognized argument Scalar");
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::MinorVisitor::operator()(Matrix const &arg)
+{
+    return arg.Minor(m_row, m_col);
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::DeterminantVisitor::operator()(Scalar const &arg)
+{
+    throw std::invalid_argument("DeterminantVisitor unrecognized argument Scalar");
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::DeterminantVisitor::operator()(Matrix const &arg)
+{
+    return arg.Determinant();
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::CofactorVisitor::operator()(Scalar const &arg)
+{
+    throw std::invalid_argument("CofactorVisitor unrecognized argument Scalar");
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::CofactorVisitor::operator()(Matrix const &arg)
+{
+    return arg.Cofactor();
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::InverseVisitor::operator()(Scalar const &arg)
+{
+    throw std::invalid_argument("InverseVisitor unrecognized argument Scalar");
+}
+
+std::variant<Scalar, Matrix> ExpressionParser::InverseVisitor::operator()(Matrix const &arg)
+{
+    return arg.Inverse();
 }

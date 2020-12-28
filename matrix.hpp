@@ -35,13 +35,14 @@ public:
     Scalar operator()(size_t const &row, size_t const &col) const;
     
     /*
-    Matrix operator^(int32_t const &other) const;
+    Matrix Pow(int32_t const &other) const;
     */
 
     Matrix Submatrix(size_t const &row, size_t const &col) const;
     Matrix Transpose() const;
     Scalar Minor(size_t const &row, size_t const &col) const;
     Scalar Determinant() const;
+    Matrix Cofactor() const;
     Matrix Inverse() const;
 
     friend std::ostream &operator<<(std::ostream &ostream, Matrix const &matrix);

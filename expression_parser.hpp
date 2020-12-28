@@ -169,4 +169,50 @@ private:
         std::variant<Scalar, Matrix> operator()(Scalar const &arg);
         std::variant<Scalar, Matrix> operator()(Matrix const &arg);
     };
+
+    struct SubmatrixVisitor
+    {
+        size_t m_row;
+        size_t m_col;
+
+        SubmatrixVisitor(size_t const &row, size_t const &col);        
+
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct TransposeVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct MinorVisitor
+    {
+        size_t m_row;
+        size_t m_col;
+
+        MinorVisitor(size_t const &row, size_t const &col);    
+
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct DeterminantVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct CofactorVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
+
+    struct InverseVisitor
+    {
+        std::variant<Scalar, Matrix> operator()(Scalar const &arg);
+        std::variant<Scalar, Matrix> operator()(Matrix const &arg);
+    };
 };

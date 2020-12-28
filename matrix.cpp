@@ -57,27 +57,14 @@ Scalar Matrix::operator()(size_t const &row, size_t const &col) const
 }
 
 /*
-Matrix Matrix::operator^(int32_t const &other) const
+Matrix Matrix::Pow(int32_t const &other) const
 {
     if (Rows() != Cols()) {
         throw std::invalid_argument("Matrix is not square");
     }
 
     if (other == 0) {
-        Matrix identity(Rows(), Cols());
-
-        for (size_t i = 0; i < Rows(); ++i) {
-            for (size_t j = 0; j < Cols(); ++j) {
-                if (i == j) {
-                    identity(i, j) = std::shared_ptr<ConstantNode>(new ConstantNode(1.0));
-                }
-                else {
-                    identity(i, j) = std::shared_ptr<ConstantNode>(new ConstantNode(0.0));
-                }
-            }
-        }
-
-        return identity;
+        return Matrix::Identity(Rows());
     }
     else if (other > 0) {
         Matrix pow = (*this);
@@ -91,7 +78,8 @@ Matrix Matrix::operator^(int32_t const &other) const
     else {
         return Inverse() ^ (other * -1);
     }
-}*/
+}
+*/
 
 Matrix Matrix::Submatrix(size_t const &row, size_t const &col) const
 {
@@ -153,6 +141,19 @@ Scalar Matrix::Determinant() const
     return determinant;
 }
 
+Matrix Matrix::Cofactor() const
+{
+    Matrix matrix(Rows(), Cols());
+
+    for (size_t i = 0; i < Rows(); ++i) {
+        for (size_t j = 0; j < Cols(); ++j) {
+            matrix(i, j) = Scalar(new MultiplicationNode({ Minor(i, j), Scalar(new ConstantNode((i + j) % 2 == 0 ? 1.0 : -1.0)) })); 
+        }
+    }
+
+    return matrix;
+}
+
 Matrix Matrix::Inverse() const
 {
     if (Rows() != Cols()) {
@@ -175,13 +176,7 @@ Matrix Matrix::Inverse() const
         return inverse;
     }
 
-    Matrix cofactor(Rows(), Cols());
-
-    for (size_t i = 0; i < Rows(); ++i) {
-        for (size_t j = 0; j < Cols(); ++j) {
-            cofactor(i, j) = Scalar(new MultiplicationNode({ Minor(i, j), Scalar(new ConstantNode((i + j) % 2 == 0 ? 1.0 : -1.0)) })); 
-        }
-    }
+    Matrix cofactor = Cofactor();
 
     Matrix cofactor_transpose = cofactor.Transpose();
     
